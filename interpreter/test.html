@@ -6,10 +6,11 @@
 <script type="application/javascript">
 
 inp = '(alert (concat "hello " "world"))'
-inp = '(alert (concat "input: " (prompt "enter some text:")))'
+inp2 = '(alert (concat "input: " (prompt "enter some text:")))'
 //inp = '(add 4 5)'
 
 t = parser.parse(inp)
+t2 = parser.parse(inp2)
 var interp = new Interp();
 interp.global_env['alert'] = native_func(function(interp, args) {
 	alert(args[0]);

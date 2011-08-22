@@ -58,19 +58,19 @@ var sh = {
 		'tab-size' : 4,
 		
 		/** Enables or disables gutter. */
-		'gutter' : true,
+		'gutter' : false,
 		
 		/** Enables or disables toolbar. */
-		'toolbar' : true,
+		'toolbar' : false,
 		
 		/** Enables quick code copy and paste from double click. */
-		'quick-code' : true,
+		'quick-code' : false,
 		
 		/** Forces code view to be collapsed. */
 		'collapse' : false,
 		
 		/** Enables or disables automatic links. */
-		'auto-links' : true,
+		'auto-links' : false,
 		
 		/** Gets or sets light mode. Equavalent to turning off gutter and toolbar. */
 		'light' : false,
@@ -90,7 +90,7 @@ var sh = {
 		stripBrs : false,
 		
 		/** Name of the tag that SyntaxHighlighter will automatically look for. */
-		tagName : 'pre',
+		tagName : 'textarea',
 		
 		strings : {
 			expandSource : 'expand source',

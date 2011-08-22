@@ -32,7 +32,6 @@
   float: none !important;
   height: auto !important;
   left: auto !important;
-  line-height: 1.1em !important;
   margin: 0 !important;
   outline: 0 !important;
   overflow: visible !important;
@@ -50,6 +49,7 @@
   font-size: 1em !important;
   min-height: inherit !important;
   min-height: auto !important;
+	scroll: none !important;
 }
 
 .syntaxhighlighter {
@@ -69,7 +69,9 @@
   font-style: italic !important;
 }
 .syntaxhighlighter .line {
-  white-space: pre !important;
+  white-space: pre-wrap !important;
+	word-break: break-all;
+	height: auto !important;
 }
 .syntaxhighlighter table {
   width: 100% !important;
@@ -95,7 +97,7 @@
   background: white !important;
   padding-left: 1em !important;
   overflow: hidden !important;
-  white-space: pre !important;
+  white-space: pre-wrap !important;
 }
 .syntaxhighlighter table td.gutter .line {
   text-align: right !important;

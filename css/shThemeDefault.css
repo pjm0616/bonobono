@@ -27,7 +27,7 @@
   background-color: #e0e0e0 !important;
 }
 .syntaxhighlighter .line.highlighted.number {
-  color: black !important;
+  color: blue !important;
 }
 .syntaxhighlighter table caption {
   color: black !important;
@@ -77,7 +77,10 @@
   color: #008200 !important;
 }
 .syntaxhighlighter .string, .syntaxhighlighter .string a {
-  color: blue !important;
+  color: red !important;
+}
+.syntaxhighlighter .number, .syntaxhighlighter .number a {
+	color: blue !important;
 }
 .syntaxhighlighter .keyword {
   color: #006699 !important;

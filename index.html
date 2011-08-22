@@ -4,10 +4,78 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>bonobono</title>
 		<link rel="stylesheet" type="text/css" href="css/cupertino/jquery-ui-1.8.16.custom.css" />
+		<link rel="stylesheet" type="text/css" href="css/shCore.css" />
+		<link rel="stylesheet" type="text/css" href="css/shCoreDefault.css" />
+		<link rel="stylesheet" type="text/css" href="css/shThemeDefault.css" />
+
 		<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+
+		<script type="text/javascript" src="js/XRegExp.js"></script>
 		<script type="text/javascript" src="js/combobox.js"></script>
-		<script>
+		<script type="text/javascript" src="js/shCore.js"></script>
+		<script type="text/javascript" src="js/shBrushBn.js"></script>
+		<script type="text/javascript" src="js/shBrushCss.js"></script>
+
+		<script type="text/javascript" src="interpreter/lexer.js"></script>
+		<script type="text/javascript" src="interpreter/listparser.js"></script>
+		<script type="text/javascript" src="interpreter/parser.js"></script>
+		<script type="text/javascript" src="interpreter/eval.js"></script>
+
+		<script type="text/javascript">
+			function highlight() {
+				SyntaxHighlighter.all();
+			}
+			highlight();
+		</script>
+
+		<script type="text/javascript">
+			function reHilight() {
+				var code = $('#orgCode')[0];
+				$('#codeArea')[0].removeChild($('#code')[0]);
+				var tmp = document.createElement('textarea');
+				tmp.id = "code";
+				tmp.setAttribute("class", "brush: Bn");
+				tmp.value = code.value; 
+				$('#codeArea')[0].appendChild(tmp);
+				highlight();
+			}
+			function processKey(event) {
+				var code = $('#orgCode')[0];
+				switch(event.which) {
+				case 8:
+					// del
+					break;
+				case 46:
+					// backspace
+					break;
+				case 37:
+					//left
+					$('#orgCode')[0].getCurs
+					break;
+				case 38:
+					//up
+					break;
+				case 39:
+					//right
+					break;
+				case 40:
+					//down
+					break;
+				default:
+					if ((event.which >= 65 && event.which <= 90) || (event.which >= 48 && event.which <= 57) || event.which == 9) {
+						code.value += String.fromCharCode(event.which);
+						reHilight();
+					}
+					else {
+						//alert(event.which);
+					}
+				}
+				return false;
+			}
+		</script>
+
+		<script type="text/javascript">
 			$.fx.speeds._default = 500;
 			$(function() {
 				$("button").button();
@@ -32,6 +100,11 @@
 				$("#clearButton").button().click(function() {
 					$('#codeArea')[0].value = "";
 				});
+				$('#runButton').button().click(function() {
+						var interp = new Interp();
+						alert(interp.eval(parser.parse($('#orgCode')[0].value)));
+						parser = {parse: parse, printlang: printlang};
+				});
 				$("#exampleComboBox").combobox({
 					selected: function(event, ui) {
 						$('#codeArea').load('example/' + $('#exampleComboBox')[0].value);
@@ -43,26 +116,31 @@
 					"face-mouth",
 					"face-sweat"
 				];
-				$('#codeArea').autocomplete({
+				$('#input').autocomplete({
 					source: function(req, responseFn) {
-						text = req.term;
+						var pos = req.term.lastIndexOf(' ');
+						if (req.term.lastIndexOf('\n') > pos)
+							pos = req.term.lastIndexOf('\n');
+						text = req.term.substr(pos + 1);
 						var re = $.ui.autocomplete.escapeRegex(text);
-						var matcher = new RegExp("\\b" + re, "i" );
+						var matcher = new RegExp("^" + re);
 						var a = $.grep(keyword, function(item,index){
 							return matcher.test(item);
 						});
 						responseFn( a );
 					},
-
-					select: function(value, data){
-						var s = ""
-						if (typeof data == "undefined") {
-							s = value;
-							}else {
-							s = data.item.value;
-						}
-				}}
-				);
+					select: function(event, ui){
+						var pos = event.target.value.lastIndexOf(' ');
+						if (event.target.value.lastIndexOf('\n') > pos)
+							pos = event.target.value.lastIndexOf('\n');
+							event.target.value = event.target.value.substr(0, pos + 1) + ui.item.value + ' ';
+							reHilight();
+						return false;
+					},
+					focus: function(event, ui){
+						return false;
+					}
+				});
 			});
 		</script>
 	</head>
@@ -77,8 +155,11 @@
 					<option value="dance.bn">Dance</option>
 				</select>
 			</div>
-			<div style="float: top;">
-				<textarea id="codeArea" style="float: top; width:400px; height: 600px;"></textarea>
+			<div id="codeArea" style="float: top; width: 400px; height: 600px; border: black solid 1px;">
+				<textarea id="orgCode"></textarea>
+				<textarea id="input" onkeydown="return processKey(event);"></textarea>
+				<textarea class="brush:bn;" id="code" style="float: top; width:400px; height: 600px;">(face-left 123)"asdf"12341234123523451asdfasdfadf</textarea>
+				<textarea id="logbono"></textarea>
 			</div>
 			<div class="action" style="float: top; font-size:10pt;">
 				<span>

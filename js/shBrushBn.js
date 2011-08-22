@@ -27,17 +27,14 @@
 
 		var keywords =	'loop begin lambda let letrec define if newref getref setref try raise except and or getaddr getvalue';
 					
-		var functions =	'concat speak' +
-										'face-left face-right face-red face-eye face-mouth face-sweat face-shake' + 
+		var functions =	'concat speak ' +
+										'face-left face-right face-red face-eye face-mouth face-sweat face-shake ' + 
 										'body-left body-right body-shell body-shake body-arm-shake body-walk';
 
 		this.regexList = [
-			{ regex: SyntaxHighlighter.regexLib.singleLineCComments,	css: 'comments' },			// one line comments
-			{ regex: SyntaxHighlighter.regexLib.multiLineCComments,		css: 'comments' },			// multiline comments
 			{ regex: SyntaxHighlighter.regexLib.doubleQuotedString,		css: 'string' },			// strings
 			{ regex: SyntaxHighlighter.regexLib.singleQuotedString,		css: 'string' },			// strings
-			{ regex: /^ *#.*/gm,										css: 'preprocessor' },
-			{ regex: new RegExp(this.getKeywords(datatypes), 'gm'),		css: 'color1 bold' },
+			{ regex: new RegExp("[0-9]+", 'gm'), 											css: 'number' },
 			{ regex: new RegExp(this.getKeywords(functions), 'gm'),		css: 'functions bold' },
 			{ regex: new RegExp(this.getKeywords(keywords), 'gm'),		css: 'keyword bold' }
 			];
