@@ -237,7 +237,7 @@ Interp.prototype.eval = function(t) {
 
 
 
-//*
+/*
 //var inp = '((lambda (n1 n2) (add n1 n2)) 4.3 2.1)'
 //var inp = '((lambda (n1 n2) (add n1 n2)) (if true 4.3 0) 2.1)'
 var inp = '(begin (if true '
