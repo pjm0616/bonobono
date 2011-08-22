@@ -65,7 +65,7 @@ ListParser.prototype._parse_symbol = function() {
 }
 ListParser.prototype._parse_number = function() {
 	var tok = this.check_next('number');
-	return {type: 'number', number: tok.data, pos: tok.pos};
+	return {type: 'number', value: tok.data, pos: tok.pos};
 }
 ListParser.prototype._parse_literal = function() {
 	var tok = this.check_next('literal');

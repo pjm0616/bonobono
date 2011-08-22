@@ -15,7 +15,7 @@ function format_listtree(t) {
 		buf += ']';
 		return buf;
 	case 'number':
-		return t.number;
+		return t.value;
 	case 'symbol':
 		return t.symbol;
 	case 'literal':
@@ -29,7 +29,7 @@ function printl(t) {
 function format_lang(t) {
 	switch (t.type) {
 	case 'Abs':
-		return '(lambda ' + JSON.stringify(t.varlist) + ' ' + format_lang(t.expr) + ')';
+		return '(lambda ' + JSON.stringify(t.vars) + ' ' + format_lang(t.body) + ')';
 	case 'App':
 		var buf = '(' + format_lang(t.func) + ' ';
 		for (i in t.args) {
@@ -40,7 +40,7 @@ function format_lang(t) {
 	case 'Var':
 		return t.name;
 	case 'Number':
-		return t.number;
+		return t.value;
 	case 'Bool':
 		return t.value;
 	case 'String':
@@ -97,16 +97,16 @@ var parse_lang;
 
 		// parse variable list
 		check_type(list[1], 'list');
-		var varlist = []
+		var vars = []
 		var tvarlist = list[1].list
 		for (i in tvarlist) {
 			var elem = tvarlist[i]
 			check_type(elem, 'symbol');
-			varlist[varlist.length] = elem.symbol;
+			vars[vars.length] = elem.symbol;
 		}
 
-		expr = parse_lang(list[2])
-		return {type: 'Abs', varlist: varlist, expr: expr};
+		body = parse_lang(list[2])
+		return {type: 'Abs', vars: vars, body: body};
 	}
 	function parse_let(t) {
 		//check_type(t, 'list');
@@ -137,7 +137,7 @@ var parse_lang;
 
 	var parsers = {
 		'number': function(t) {
-			return {type: 'Number', number: t.number, pos: t.pos};
+			return {type: 'Number', value: t.value, pos: t.pos};
 		},
 		'symbol': function(t) {
 			var sym = t.symbol;
@@ -188,7 +188,7 @@ exports.parse = parse;
 exports.format_lang = format_lang;
 exports.printlang = printlang;
 
-//*
+/*
 var inp = '((lambda (n1 n2) (+ n1 n2)) 4 2)'
 list = listparser.listparse(inp);
 expr = parse_lang(list);
