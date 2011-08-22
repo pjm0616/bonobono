@@ -189,8 +189,6 @@ var parse_lang;
 	};
 
 	parse_lang = function(t) {
-		print(typeof(t))
-		print(t.type)
 		parser = parsers[t.type];
 		return parser(t);
 	}
