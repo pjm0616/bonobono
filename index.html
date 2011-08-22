@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>bonobono</title>
+		<link rel="stylesheet" type="text/css" href="css/cupertino/jquery-ui-1.8.16.custom.css" />
+		<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+		<script type="text/javascript" src="js/combobox.js"></script>
+		<script>
+			$.fx.speeds._default = 500;
+			$(function() {
+				$("button").button();
+				$("#helpDialog").dialog({
+					autoOpen: false,
+					show: "blind",
+					hide: "blind",
+					width: 400,
+					height: 600,
+					open: (function() {
+						$('#helpDialog').load('help.html');
+					})
+				});
+				$("#helpButton").button().click(function() {
+					if ($("#helpDialog").dialog("isOpen")) {
+						$("#helpDialog").dialog("close");
+					}
+					else {
+						$("#helpDialog").dialog("open");
+					}
+				});
+				$("#clearButton").button().click(function() {
+					$('#codeArea')[0].value = "";
+				});
+				$("#exampleComboBox").combobox({
+					selected: function(event, ui) {
+						$('#codeArea').load('example/' + $('#exampleComboBox')[0].value);
+					}
+				});
+				var keyword = [
+					"loop",
+					"face-eye",
+					"face-mouth",
+					"face-sweat"
+				];
+				$('#codeArea').autocomplete({
+					source: function(req, responseFn) {
+						text = req.term;
+						var re = $.ui.autocomplete.escapeRegex(text);
+						var matcher = new RegExp("\\b" + re, "i" );
+						var a = $.grep(keyword, function(item,index){
+							return matcher.test(item);
+						});
+						responseFn( a );
+					},
+
+					select: function(value, data){
+						var s = ""
+						if (typeof data == "undefined") {
+							s = value;
+							}else {
+							s = data.item.value;
+						}
+				}}
+				);
+			});
+		</script>
+	</head>
+	<body>
+		<div id="screenDiv" style="float: left">
+			<canvas id="screen" style="width: 800px;height: 680px;">
+		</div>
+		<div id="" style="float: left;">
+			<div style="float: top;">
+				<select id="exampleComboBox" onselect="alert('asdf');">
+					<option value="">Select</option>
+					<option value="dance.bn">Dance</option>
+				</select>
+			</div>
+			<div style="float: top;">
+				<textarea id="codeArea" style="float: top; width:400px; height: 600px;"></textarea>
+			</div>
+			<div class="action" style="float: top; font-size:10pt;">
+				<span>
+					<button id="helpButton">HELP</button>
+				</span>
+				<span>
+					<button id="clearButton">Clear</button>
+				</span>
+				<span>
+					<button id="runButton">RUN!</button>
+				</span>
+			</div>
+		</div>
+		<div id="hiddenDiv" style="hidden: true;">
+			<audio id="audio" style="hidden: true;">This browser doesn't support audio tag!</audio>
+		</div>
+		<div id="helpDialog" title="help">
+		</div>
+	</body>
+</html>
