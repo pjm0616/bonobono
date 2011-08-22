@@ -22,7 +22,7 @@ function format_listtree(t) {
 		return '"' + t.literal + '"';
 	}
 }
-function printl(t) {
+function print_listtree(t) {
 	sys.print(format_listtree(t) + '\n');
 }
 
@@ -45,6 +45,8 @@ function format_lang(t) {
 		return t.value;
 	case 'String':
 		return '"' + t.data + '"';
+	case 'If':
+		return 'If(' + format_lang(t.cond) + ', ' + format_lang(t.trueexpr) + ', ' + format_lang(t.falseexpr) + ')';
 	default:
 		return '???';
 	}
@@ -118,11 +120,12 @@ var parse_lang;
 		var varname, expr;
 		check_type(list[1], 'list');
 		{
-			var list = list[1].list;
-			check(list.length, 2, 'list.length is not 2');
-			check_type(list[0], 'symbol');
-			varname = list[0];
-			expr = parse_lang(list[1]);
+			var list2 = list[1].list;
+			check(list2.length, 2, 'list.length is not 2');
+			check_type(list2[0], 'symbol');
+
+			varname = list2[0].symbol;
+			expr = parse_lang(list2[1]);
 		}
 
 		var body = parse_lang(list[2]);
@@ -133,6 +136,16 @@ var parse_lang;
 		res.type = 'LetRec';
 		check_type(res.expr, 'Abs');
 		return res;
+	}
+
+	function parse_if(t) {
+		var list = t.list;
+		check(list.length, 4, 'list.length is not 4');
+
+		var cond = parse_lang(list[1]);
+		var trueexpr = parse_lang(list[2]);
+		var falseexpr = parse_lang(list[3]);
+		return {type: 'If', cond: cond, trueexpr: trueexpr, falseexpr: falseexpr};
 	}
 
 	var parsers = {
@@ -166,6 +179,8 @@ var parse_lang;
 					return parse_let(t);
 				} else if (sym == 'letrec') {
 					return parse_letrec(t);
+				} else if (sym == 'if') {
+					return parse_if(t);
 				}
 			}
 
@@ -174,6 +189,8 @@ var parse_lang;
 	};
 
 	parse_lang = function(t) {
+		print(typeof(t))
+		print(t.type)
 		parser = parsers[t.type];
 		return parser(t);
 	}
