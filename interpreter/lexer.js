@@ -1,6 +1,11 @@
 
-var sys = require('sys');
-var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+if (typeof window == 'undefined') {
+	var sys = require('sys');
+	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+} else {
+	var exports = window;
+	var print = function(s) { alert(s); };
+}
 
 function Lexer(inp) {
 	this.inp = inp;

@@ -1,8 +1,14 @@
 
-var sys = require('sys');
-var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+if (typeof window == 'undefined') {
+	var sys = require('sys');
+	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+	var listparser = require('./listparser.js')
+} else {
+	var exports = window;
+	var print = function(s) { alert(s); };
+	var listparser = {listparse: listparse};
+}
 
-var listparser = require('./listparser.js')
 
 function format_listtree(t) {
 	switch (t.type) {
@@ -15,21 +21,21 @@ function format_listtree(t) {
 		buf += ']';
 		return buf;
 	case 'number':
-		return t.number;
+		return t.value;
 	case 'symbol':
 		return t.symbol;
 	case 'literal':
 		return '"' + t.literal + '"';
 	}
 }
-function printl(t) {
+function print_listtree(t) {
 	sys.print(format_listtree(t) + '\n');
 }
 
 function format_lang(t) {
 	switch (t.type) {
 	case 'Abs':
-		return '(lambda ' + JSON.stringify(t.varlist) + ' ' + format_lang(t.expr) + ')';
+		return '(lambda ' + JSON.stringify(t.vars) + ' ' + format_lang(t.body) + ')';
 	case 'App':
 		var buf = '(' + format_lang(t.func) + ' ';
 		for (i in t.args) {
@@ -40,11 +46,13 @@ function format_lang(t) {
 	case 'Var':
 		return t.name;
 	case 'Number':
-		return t.number;
+		return t.value;
 	case 'Bool':
 		return t.value;
 	case 'String':
 		return '"' + t.data + '"';
+	case 'If':
+		return 'If(' + format_lang(t.cond) + ', ' + format_lang(t.trueexpr) + ', ' + format_lang(t.falseexpr) + ')';
 	default:
 		return '???';
 	}
@@ -97,16 +105,16 @@ var parse_lang;
 
 		// parse variable list
 		check_type(list[1], 'list');
-		var varlist = []
+		var vars = []
 		var tvarlist = list[1].list
 		for (i in tvarlist) {
 			var elem = tvarlist[i]
 			check_type(elem, 'symbol');
-			varlist[varlist.length] = elem.symbol;
+			vars[vars.length] = elem.symbol;
 		}
 
-		expr = parse_lang(list[2])
-		return {type: 'Abs', varlist: varlist, expr: expr};
+		body = parse_lang(list[2])
+		return {type: 'Abs', vars: vars, body: body};
 	}
 	function parse_let(t) {
 		//check_type(t, 'list');
@@ -118,11 +126,12 @@ var parse_lang;
 		var varname, expr;
 		check_type(list[1], 'list');
 		{
-			var list = list[1].list;
-			check(list.length, 2, 'list.length is not 2');
-			check_type(list[0], 'symbol');
-			varname = list[0];
-			expr = parse_lang(list[1]);
+			var list2 = list[1].list;
+			check(list2.length, 2, 'list.length is not 2');
+			check_type(list2[0], 'symbol');
+
+			varname = list2[0].symbol;
+			expr = parse_lang(list2[1]);
 		}
 
 		var body = parse_lang(list[2]);
@@ -135,9 +144,19 @@ var parse_lang;
 		return res;
 	}
 
+	function parse_if(t) {
+		var list = t.list;
+		check(list.length, 4, 'list.length is not 4');
+
+		var cond = parse_lang(list[1]);
+		var trueexpr = parse_lang(list[2]);
+		var falseexpr = parse_lang(list[3]);
+		return {type: 'If', cond: cond, trueexpr: trueexpr, falseexpr: falseexpr};
+	}
+
 	var parsers = {
 		'number': function(t) {
-			return {type: 'Number', number: t.number, pos: t.pos};
+			return {type: 'Number', value: t.value, pos: t.pos};
 		},
 		'symbol': function(t) {
 			var sym = t.symbol;
@@ -166,6 +185,8 @@ var parse_lang;
 					return parse_let(t);
 				} else if (sym == 'letrec') {
 					return parse_letrec(t);
+				} else if (sym == 'if') {
+					return parse_if(t);
 				}
 			}
 
@@ -188,7 +209,7 @@ exports.parse = parse;
 exports.format_lang = format_lang;
 exports.printlang = printlang;
 
-//*
+/*
 var inp = '((lambda (n1 n2) (+ n1 n2)) 4 2)'
 list = listparser.listparse(inp);
 expr = parse_lang(list);

@@ -1,0 +1,25 @@
+<script type="application/javascript" src="lexer.js"></script>
+<script type="application/javascript" src="listparser.js"></script>
+<script type="application/javascript" src="parser.js"></script>
+<script type="application/javascript" src="eval.js"></script>
+
+<script type="application/javascript">
+
+inp = '(alert (concat "hello " "world"))'
+inp = '(alert (concat "input: " (prompt "enter some text:")))'
+//inp = '(add 4 5)'
+
+t = parser.parse(inp)
+var interp = new Interp();
+interp.global_env['alert'] = native_func(function(interp, args) {
+	alert(args[0]);
+});
+interp.global_env['prompt'] = native_func(function(interp, args) {
+	return prompt(args[0]);
+});
+
+r = interp.eval(t);
+document.write(r);
+
+</script>
+
