@@ -1,0 +1,192 @@
+<html>
+<head>
+<title>Line</title>
+<script type="text/javascript">
+var canvas;
+var ctx;
+var head_r = 200 ;
+function iniCanvas(){
+	canvas=document.getElementById("test");
+	ctx=canvas.getContext("2d");
+}
+
+
+function draw_body(){
+	ctx.fillStyle="rgb(143,208,240)";
+	ctx.strokeStyle="rgb(0,0,0)";
+
+	ctx.beginPath();
+	ctx.moveTo(199.975, 333.0371);
+	ctx.quadraticCurveTo(83.9895, 308.0403, 88.9889, 190.055);
+	ctx.quadraticCurveTo(94.9881, 67.07039999999995, 234.9706, 56.07180000000005);
+	ctx.quadraticCurveTo(382.9521, 71.06989999999996, 362.9546, 214.05200000000002);
+	ctx.quadraticCurveTo(362.9546, 306.0405, 253.9682, 334.037);
+	ctx.quadraticCurveTo(214.9731, 342.036, 199.975, 333.0371);
+	ctx.fill();
+	ctx.beginPath();
+	ctx.moveTo(199.975, 333.0371);
+	ctx.quadraticCurveTo(83.9895, 308.0403, 88.9889, 190.055);
+	ctx.quadraticCurveTo(94.9881, 67.07039999999995, 234.9706, 56.07180000000005);
+	ctx.quadraticCurveTo(382.9521, 71.06989999999996, 362.9546, 214.05200000000002);
+	ctx.quadraticCurveTo(362.9546, 306.0405, 253.9682, 334.037);
+	ctx.stroke();
+	
+	ctx.beginPath();
+	ctx.moveTo(126.9841, 293.0421);
+	ctx.quadraticCurveTo(38.9951, 440.0238, 130.9836, 578.0065);
+	ctx.quadraticCurveTo(99.9875, 592.0048, 95.988, 600.0038);
+	ctx.quadraticCurveTo(92.668, 614.1358, 105.926, 608.0592);
+	ctx.quadraticCurveTo(95.7062, 612.7548, 99.0207, 618.5551);
+	ctx.quadraticCurveTo(100.678, 622.422, 108.9642, 615.793);
+	ctx.quadraticCurveTo(93.4966, 631.5369, 121.3936, 625.4603);
+	ctx.quadraticCurveTo(191.8268, 616.3455, 175.2543, 588.7246);
+	ctx.quadraticCurveTo(165.0095, 590.5005, 188.7202, 557.395);
+	ctx.quadraticCurveTo(219.1415, 571.0398, 270.8129, 552.0264999999999);
+	ctx.quadraticCurveTo(266.1155, 555.8292, 279.313, 576.4083);
+	ctx.quadraticCurveTo(255.8292, 596.7872, 283.3426, 607.0767);
+	ctx.quadraticCurveTo(324.7245, 634.1426, 337.4746, 622.7347);
+	ctx.quadraticCurveTo(340.6062, 622.7347, 334.7904, 615.1294);
+	ctx.quadraticCurveTo(341.0535, 620.4978, 344.8562, 620.4978);
+	ctx.quadraticCurveTo(347.5404, 620.4978, 343.2904, 609.3136);
+	ctx.quadraticCurveTo(342.843, 614.9058, 350.672, 613.3399);
+	ctx.quadraticCurveTo(361.409, 604.1688, 320.0271, 579.787);
+	ctx.quadraticCurveTo(405.9492, 423.0259, 320.9599, 301.0411);
+	ctx.fill();
+	ctx.stroke();
+	
+}
+
+function draw_eye(){
+	ctx.fillStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.arc(124, 185, 5, 0, Math.PI*2, 1);
+	ctx.closePath();
+	ctx.fill();
+	ctx.beginPath();
+	ctx.arc(335, 185, 5, 0, Math.PI*2, 1);
+	ctx.closePath();
+	ctx.fill();
+}
+
+function draw_nose(){
+	ctx.beginPath();
+	ctx.moveTo(221.9722, 226.0505);
+	ctx.bezierCurveTo(231.8346, 225.5193, 238.766, 225.95819999999998, 242.9696, 231.04989999999998);
+	ctx.bezierCurveTo(245.3024, 233.3827, 247.6359, 235.71620000000001, 249.9687, 238.04899999999998);
+	ctx.bezierCurveTo(250.3688, 253.18529999999998, 245.6337, 257.3985, 237.9702, 264.0458);
+	ctx.bezierCurveTo(227.6016, 264.5958, 219.4292, 264.4177, 214.9731, 259.0464);
+	ctx.bezierCurveTo(213.3068, 257.3801, 211.64, 255.7133, 209.9737, 254.04700000000003);
+	ctx.bezierCurveTo(210.307, 248.7149, 210.6404, 243.3811, 210.9736, 238.04899999999998);
+	ctx.bezierCurveTo(213.438, 232.2267, 217.6453, 229.88060000000002, 221.9722, 226.0505);
+	ctx.closePath();
+	ctx.fillStyle="rgb(0,0,0)";
+	ctx.fill();
+}
+
+function draw_lip(){
+	ctx.fillStyle="rgb(215,191,205)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.moveTo(201.9747, 251.04739999999998);
+	ctx.bezierCurveTo(203.9743, 251.04739999999998, 205.9744, 251.04739999999998, 207.974, 251.04739999999998);
+	ctx.bezierCurveTo(214.4368, 260.1951, 226.5942, 261.5586, 230.9711, 268.0453);
+	ctx.bezierCurveTo(239.528, 286.3724, 216.4291, 305.7412, 197.9752, 297.0416);
+	ctx.bezierCurveTo(190.3514, 293.8625, 179.0888, 280.7378, 184.9769, 268.0453);
+	ctx.bezierCurveTo(188.4065, 260.0441, 195.6189, 256.1358, 201.9747, 251.04739999999998);
+	ctx.closePath();
+	ctx.fill();
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(253.9682, 252.0473);
+	ctx.bezierCurveTo(266.8707, 255.32639999999998, 272.8288, 265.9995, 277.9652, 277.0441);
+	ctx.bezierCurveTo(275.516, 296.9851, 251.8001, 307.0045, 234.9706, 294.042);
+	ctx.bezierCurveTo(234.6374, 293.3755, 234.304, 292.7088, 233.9707, 292.0423);
+	ctx.bezierCurveTo(233.8567, 269.6026, 239.9794, 260.3536, 253.9682, 252.0473);
+	ctx.closePath();
+	ctx.fill();
+	ctx.stroke();
+}
+
+function draw_arm(){
+	ctx.beginPath();
+	ctx.moveTo(308.4646, 346.5954);
+	ctx.quadraticCurveTo(275.3458, 382.553, 252.6356, 380.0297);
+	ctx.quadraticCurveTo(232.4488, 382.2376, 244.7502, 391.0693);
+	ctx.quadraticCurveTo(236.8648, 398.3239, 245.6965, 404.31690000000003);
+	ctx.quadraticCurveTo(234.0259, 411.88689999999997, 252.0047, 420.40319999999997);
+	ctx.quadraticCurveTo(276.9229, 441.8517, 331.8056, 414.4103);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(145.2621, 350.6685);
+	ctx.quadraticCurveTo(166.3492, 378.43309999999997, 211.8619, 386.1649);
+	ctx.quadraticCurveTo(225.9199, 386.5164, 222.4054, 397.05989999999997);
+	ctx.quadraticCurveTo(232.5974, 401.10159999999996, 223.284, 411.4693);
+	ctx.quadraticCurveTo(229.6102, 415.8625, 214.3221, 423.24289999999996);
+	ctx.quadraticCurveTo(170.8819, 445.5433, 116.619, 414.2809);
+	ctx.stroke();
+}
+
+function draw_shell(){
+	ctx.fillStyle="rgb(215,129,154)";
+	ctx.beginPath();
+	ctx.moveTo(241.9697, 350.035);
+	ctx.bezierCurveTo(247.1585, 350.0307, 249.5958, 350.3587, 251.9685, 353.0346);
+	ctx.bezierCurveTo(267.5981, 364.4112, 263.4126, 438.89340000000004, 249.9687, 452.0223);
+	ctx.bezierCurveTo(232.2879, 452.2908, 218.6364, 440.00980000000004, 210.9736, 430.025);
+	ctx.bezierCurveTo(213.2516, 424.0106, 221.6585, 422.0905, 225.9717, 418.0265);
+	ctx.bezierCurveTo(226.8181, 400.0902, 223.4376, 388.83140000000003, 209.9737, 385.0306);
+	ctx.bezierCurveTo(213.4971, 368.3707, 228.9744, 357.7251, 241.9697, 350.035);
+	ctx.fill();
+	ctx.stroke();
+}
+
+function draw_musta(){
+	ctx.beginPath();
+	ctx.moveTo(191,272);
+	ctx.lineTo(152,273);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(199,289);
+	ctx.lineTo(169,306);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(156,293);
+	ctx.lineTo(191,285);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(270,270);
+	ctx.lineTo(303,270);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(270,279);
+	ctx.lineTo(305,289);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(263,287);
+	ctx.lineTo(300,305);
+	ctx.stroke();
+}
+
+function draw_front(){
+	iniCanvas();
+	draw_body();
+	draw_eye();
+	draw_lip();
+	draw_musta();
+	draw_nose();
+	draw_arm();
+	draw_shell();
+}
+
+</script>
+</head>
+<body>
+	<div id="Canvas Ex">
+		<canvas id="test" width="470" height="630">
+		</canvas>
+	</div>
+	<script type="text/javascript">
+		draw_front();
+	</script>
+</body>
+</html>
