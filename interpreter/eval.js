@@ -1,8 +1,13 @@
 
-var sys = require('sys');
-var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
-
-var parser = require('./parser.js')
+if (typeof window == 'undefined') {
+	var sys = require('sys');
+	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+	var parser = require('./parser.js')
+} else {
+	var exports = window;
+	var print = function(s) { alert(s); };
+	var parser = {parse: parse, printlang: printlang};
+}
 
 function Env(parent) {
 	this.parent = parent;
@@ -90,7 +95,6 @@ Interp.prototype.init = function() {
 }
 Interp.prototype.error = function(msg) {
 	print(msg);
-	null = 1;
 	throw msg;
 }
 Interp.prototype.check_type = function(t, type) {
@@ -237,8 +241,8 @@ Interp.prototype.eval = function(t) {
 //var inp = '((lambda (n1 n2) (add n1 n2)) 4.3 2.1)'
 //var inp = '((lambda (n1 n2) (add n1 n2)) (if true 4.3 0) 2.1)'
 var inp = '(begin (if true '
-					+'(print (concat "PRINT TEST asldkfjasldfasfwioq3coaic " 3))'
-					+'0)'
+					+'(print (concat "PRINT TEST asldkfjasldfasfwioq3coaic " 3 " " (add 1 2.4)))'
+					+'(print "FALSE"))'
 				+'('
 					+'(lambda (n1 n2) (add n1 n2))'
 					+'(if (gt 0.1 0.2) 4.3 100)'
@@ -256,6 +260,11 @@ inp = '((lambda (n)\n'+
 '		(loop 2)\n'+
 '		)\n'+
 '	) 49)';
+xinp = '(letrec (loop (lambda (v)\n' +
+			'(if (eq v 0)' +
+				'0' +
+				'(add v (loop (sub v 1))))))' +
+			'(loop 100000))';
 t = parser.parse(inp);
 //parser.printlang(t)
 var interp = new Interp();

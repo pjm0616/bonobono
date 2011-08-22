@@ -1,8 +1,13 @@
 
-var sys = require('sys');
-var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
-
-var lexer = require('./lexer.js');
+if (typeof window == 'undefined') {
+	var sys = require('sys');
+	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+	var lexer = require('./lexer.js');
+} else {
+	var exports = window;
+	var print = function(s) { alert(s); };
+	var lexer = {lex: lex};
+}
 
 function ListParser(tokens) {
 	this.tokens = tokens;

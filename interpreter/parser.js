@@ -1,8 +1,14 @@
 
-var sys = require('sys');
-var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+if (typeof window == 'undefined') {
+	var sys = require('sys');
+	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+	var listparser = require('./listparser.js')
+} else {
+	var exports = window;
+	var print = function(s) { alert(s); };
+	var listparser = {listparse: listparse};
+}
 
-var listparser = require('./listparser.js')
 
 function format_listtree(t) {
 	switch (t.type) {
