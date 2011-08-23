@@ -28,12 +28,12 @@ var motion = {
 
 	face_red : function (sec)
 	{
-	set_log("face red : ['_']");
-	face_red = 1;
+		set_log("face red : ['_']");
+		face_red = 1;
 
-	$(document).oneTime(1000 * sec,  function(){
-		face_red = 0;
-	});
+		$(document).oneTime(1000 * sec, function(){
+			$(this).parent().face_red = 0;
+		});
 	},
 	
 	face_eye : function (n,sec)
@@ -88,6 +88,8 @@ var motion = {
 	body_arm_shake: function(speed,deg)
 	{
 		set_log("body arm shake : speed = " + speed + " | deg = " + deg);
+		body_arm_speed = 0.5;
+		body_arm_A = 30;
 	},
 
 	body_walk: function(speed,sec)
