@@ -10,6 +10,9 @@
 		<canvas id="test" width="470" height="630">
 		</canvas>
 	</div>
+	<div id="sound" >
+	<audio id = "vocal" controls autoplay style="display: none;" name="media" src="http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&amp;lang=ko&amp;text=보노보노"></audio>
+	</div>
 	<div id="content">
 		<script type="text/javascript">
 			init_data();
@@ -17,13 +20,14 @@
 			// shake 주기 1초
 			// 15도씩 왔다갔다
 			
-			face_shake_speed = 2;
-			face_shake_A = 30;
-			body_shake_speed = 0;
+			face_shake_speed = 1;
+			face_shake_A = 15;
+			body_shake_speed = 1;
 			body_shake_A = 15;
 			
 			setInterval(draw_front,time_interval);
 		</script>
 	</div>
+
 </body>
 </html>

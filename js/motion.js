@@ -9,6 +9,11 @@ function set_log(str)
 function speak(str)
 {
 	set_log("speak :"+str);
+	speak_elemnt = document.getElementById("vocal");
+
+	speak_elemnt.src = "http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&amp;lang=ko&amp;text="+encodeURIComponent(str);
+	speak_elemnt.load();
+
 }
 function face-left()
 {
