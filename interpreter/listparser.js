@@ -1,5 +1,5 @@
 
-if (typeof window == 'undefined') {
+if (typeof window === 'undefined') {
 	var sys = require('sys');
 	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
 	var lexer = require('./lexer.js');
