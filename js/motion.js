@@ -39,18 +39,22 @@ var motion = {
 	face_eye : function (n,sec)
 	{
 		set_log("face eye : n = " + n + " | sec = " + sec);
+		face_eye_state = n;
 	},
 	
 	face_mouth: function(speed,sec)
 	{
 		set_log("face mouth : speed = "+ speed + " | sec = " + sec);
+		face_mouse_speed = speed;
 	},
 	
 	face_sweat: function(n)
 	{
 		set_log("face sweat : n = " + n);
-		speak_elemnt = document.getElementById("sweat");
+		speak_elemnt = document.getElementById("effect");
 		speak_elemnt.play();
+
+		face_sweat_len = n;
 	},
 
 	face_shake: function(speed,sec)
