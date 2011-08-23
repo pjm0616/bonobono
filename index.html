@@ -23,6 +23,7 @@
 		<script type="text/javascript" src="js/shBrushCss.js"></script>
 
 		<script type="text/javascript" src="js/ide.js"></script>
+		<script type="text/javascript" src="js/ui.js"></script>
 
 		<script type="text/javascript" src="interpreter/lexer.js"></script>
 		<script type="text/javascript" src="interpreter/listparser.js"></script>
@@ -31,100 +32,12 @@
 
 		<script type="text/javascript" src="js/bonobonovector.js"></script>
 		<script type="text/javascript" src="js/motion.js"></script>
-
-		<script type="text/javascript">
-			SyntaxHighlighter.all();
-			var code = $('#orgCode')[0], input = $('#input')[0];
-			$.fx.speeds._default = 500;
-			jQuery(function($) {
-				$(this).everyTime(500, 'cursur', function() {
-
-					$('#cursur').fadeIn(250).fadeOut(250);
-				});
-			});
-			$(function() {
-					$("button").button();
-					$("#helpDialog").dialog({
-						autoOpen: false,
-						show: "blind",
-						hide: "blind",
-						width: 400,
-						height: 600,
-						open: (function() {
-							$('#helpDialog').load('help.html');
-							})
-						});
-					$("#helpButton").button().click(function() {
-						if ($("#helpDialog").dialog("isOpen")) {
-							$("#helpDialog").dialog("close");
-						}
-						else {
-							$("#helpDialog").dialog("open");
-						}
-						});
-					$("#clearButton").button().click(function() {
-						code.value = "";
-						curStart = 0;
-						reHilight();
-						});
-					$('#runButton').button().click(function() {
-						var interp = new Interp();
-						interp.eval(parse($('#orgCode')[0].value));
-						});
-					$("#exampleComboBox").combobox({
-						selected: function(event, ui) {
-							$('#orgCode').load('example/' + $('#exampleComboBox')[0].value);
-							curStart = curEnd = 0;
-							reHilight();
-						}
-						});
-					var keyword = [
-						"loop",
-						"face-eye",
-						"face-mouth",
-						"face-sweat",
-						"print"
-							];
-					$('#input').autocomplete({
-						open: function(event, ui) {
-						$(this).next().css('left', $('#input')[0].style['left']);
-						$(this).next().css('top', $('#input')[0].style['top']);
-							},
-						source: function(req, responseFn) {
-							var pos = req.term.lastIndexOf(' ');
-							if (req.term.lastIndexOf('\n') > pos)
-								pos = req.term.lastIndexOf('\n');
-							text = req.term.substr(pos + 1);
-							var re = $.ui.autocomplete.escapeRegex(text);
-							var matcher = new RegExp("^" + re);
-							var a = $.grep(keyword, function(item,index){
-								return matcher.test(item);
-								});
-							responseFn( a );
-							},
-						select: function(event, ui) {
-							var input = $('#input')[0];
-							var code = $('#orgCode')[0];
-							console.log(curStart);
-							console.log(input.selectionStart);
-							code.value = code.value.substr(0, curStart - input.selectionStart) + ui.item.value + code.value.substr(curStart - input.selectionStart + input.value.length);
-							curStart = curStart + ui.item.value.length - input.selectionStart;
-							curEnd = curStart;
-							input.value = "";
-							reHilight();
-							//alert($('#orgCode'));
-							return false;
-							},
-						focus: function(event, ui){
-							return false;
-							}
-					});
-			});
-		</script>
 	</head>
 	<body>
 		<div id="screenDiv" style="float: left">
-			<canvas id="screen" style="width: 800px;height: 680px;">
+			<canvas id="screen" style="width: 800px;height: 680px;"></canvas>
+			<div id="userInputDialog" title="input">
+			</div>
 		</div>
 		<div id="" style="float: left;">
 			<div style="float: top;">

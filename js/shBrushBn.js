@@ -23,7 +23,7 @@
 	{
 		// Copyright 2006 Shin, YoungJin
 	
-		var datatypes =	'';
+		var datatypes =	'and or eq lt gt add mul sub mod div pow';
 
 		var keywords =	'loop begin lambda let letrec define if newref getref setref try raise except and or getaddr getvalue';
 					
@@ -35,6 +35,7 @@
 			{ regex: SyntaxHighlighter.regexLib.doubleQuotedString,		css: 'string' },			// strings
 			{ regex: SyntaxHighlighter.regexLib.singleQuotedString,		css: 'string' },			// strings
 			{ regex: new RegExp("[0-9]+", 'gm'), 											css: 'number' },
+			{ regex: new RegExp(this.getKeywords(datatypes), 'gm'),		css: 'constants bold' },
 			{ regex: new RegExp(this.getKeywords(functions), 'gm'),		css: 'functions bold' },
 			{ regex: new RegExp(this.getKeywords(keywords), 'gm'),		css: 'keyword bold' }
 			];
