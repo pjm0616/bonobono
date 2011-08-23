@@ -1,8 +1,7 @@
-var log = document.getElementById("logbono");
-
 function set_log(str)
 {
-	log.innerHTML = str+"\n";
+	log = document.getElementById("logbono");
+	log.value = log.value + str+"\n";
 }
 
 
@@ -11,63 +10,78 @@ function speak(str)
 	set_log("speak :"+str);
 	speak_elemnt = document.getElementById("vocal");
 
-	speak_elemnt.src = "http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&amp;lang=ko&amp;text="+encodeURIComponent(str);
+	speak_elemnt.src = "http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&lang=ko&text="+encodeURIComponent(str);
 	speak_elemnt.load();
+	speak_elemnt.play();
 
 }
-function face-left()
+function face_left()
 {
 	set_log("face left : <']");
 }
-function face-right()
+function face_right()
 {
 	set_log("face right : ['>");
 }
 
-function face-red()
+function stop_face_red()
 {
-	set_log("face red : ['-']");
+	face_red = 0;
+}
+function face_red()
+{
+	set_log("face red : ['_']");
+	face_red = 1;
 }
 
-function face-eye(n,sec)
+function face_eye(n,sec)
 {
 	set_log("face eye : n = " + n + " | sec = " + sec);
 }
-function face-mouth(speed,sec)
+function face_mouth(speed,sec)
 {
 	set_log("face mouth : speed = "+ speed + " | sec = " + sec);
 }
-function face-sweat(n)
+function face_sweat(n)
 {
 	set_log("face sweat : n = " + n);
+	speak_elemnt = document.getElementById("sweat");
+	speak_elemnt.play();
 }
-function face-shake(speed,sec)
+function face_shake(speed,sec)
 {
 	set_log("face shake : speed = " + speed + " | sec = " + sec);
+	face_shake_speed = 0.5;
+	face_shake_A = 15;
 }
 
-function body-left()
+function body_left()
 {
 	set_log("body left : ( [ )");
 }
-function body-right()
+function body_right()
 {
 	set_log("body right : ( ] )");
 }
 
-function body-shell()
+function body_shell()
 {
 	set_log("body shell : ( * )");
 }
-function body-shake(speed,deg)
+function body_shake(speed,deg)
 {
 	set_log("body shake : speed = " + speed + " | deg = " + deg);
+	
+	face_shake_speed = 0.5;
+	face_shake_A = 15;
+	body_shake_speed = 0.5;
+	body_shake_A = 15;
 }
-function body-arm-shake(speed,deg)
+function body_arm_shake(speed,deg)
 {
 	set_log("body arm shake : speed = " + speed + " | deg = " + deg);
 }
-function body-walk(speed,sec)
+function body_walk(speed,sec)
 {
 	set_log("body walk : speed = " + speed + " | sec = " + sec);
 }

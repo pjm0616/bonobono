@@ -1,8 +1,9 @@
 <html>
 <head>
 <title>Line</title>
-
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
 <script type="text/javascript" src="js/bonobonovector.js"></script>
+<script type="text/javascript" src="js/motion.js"></script>
 
 </head>
 <body>
@@ -10,30 +11,38 @@
 		<canvas id="test" width="600" height="800">
 		</canvas>
 	</div>
+	<div id="sound" >
+		<audio id = "vocal" controls autoplay style="display: none;" name="media" src="http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&lang=ko&text=보노"></audio>
+
+		<audio id = "sweat" controls autoplay style="display: none;" name="media" src="data/sweat.mp3"></audio>
+
+	</div>
 	<div id="content">
 		<script type="text/javascript">
 			init_data();
 			
-			// shake 주기 1초
-			// 15도씩 왔다갔다
+			// shake 주기 1�			// 15�씩 �다갔다
 			
-			face_shake_speed = 2;
+			face_shake_speed = 0;
 			face_shake_A = 15;
-			body_shake_speed = 1;
+			body_shake_speed = 0;
 			body_shake_A = 15;
-			body_arm_speed = 2;
-			body_arm_A = 30;
+			body_arm_speed = 0;
+			body_arm_A = 0;
 			
-			face_sweat_len = 4;
+			face_sweat_len = 0;
 			
-			face_eye_state = 1;
+			face_eye_state = 0;
 			
-			face_red = 1;
+			face_red = 0;
 			
-			face_mouse_speed = 1;
+			face_mouse_speed = 0;
 			
 			setInterval(draw_front,time_interval);
 		</script>
 	</div>
+	<textarea id="logbono" style="float:bottom;">bonobono</textarea>
+	<input type="button" value="보기" onclick="speak('보노보노');" /> 
+
 </body>
 </html>
