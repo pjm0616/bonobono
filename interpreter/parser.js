@@ -211,6 +211,9 @@ var parse_lang;
 	};
 
 	parse_lang = function(t) {
+		if (!t) {
+			return null;
+		}
 		parser = parsers[t.type];
 		return parser(t);
 	}

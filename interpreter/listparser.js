@@ -39,7 +39,9 @@ ListParser.prototype.check_next = function(exp) {
 }
 ListParser.prototype.parse = function() {
 	var tok = this.current();
-	if (tok.token == '(') {
+	if (!tok) {
+		return null;
+	} else if (tok.token == '(') {
 		return this._parse_list();
 	} else if (tok.token == 'symbol') {
 		return this._parse_symbol();
