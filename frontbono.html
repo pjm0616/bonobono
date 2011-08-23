@@ -2,8 +2,29 @@
 <head>
 <title>Line</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<script type="application/javascript" src="js/jquery-1.6.2.min.js"></script>
+
+<script type="application/javascript" src="interpreter/lexer.js"></script>
+<script type="application/javascript" src="interpreter/listparser.js"></script>
+<script type="application/javascript" src="interpreter/parser.js"></script>
+<script type="application/javascript" src="interpreter/eval.js"></script>
+<script type="application/javascript" src="interpreter/util.js"></script>
+
 <script type="text/javascript" src="js/bonobonovector.js"></script>
 <script type="text/javascript" src="js/motion.js"></script>
+
+<script type="text/javascript">
+	var g_interp = new Interp();
+	register_funcs(g_interp, motion);
+
+	var funcs = {
+		'alert': alert,
+		'prompt': function(msg) {
+			return prompt(msg);
+		},
+	};
+	register_funcs(g_interp, funcs);
+</script>
 
 </head>
 <body>
@@ -43,7 +64,15 @@
 		</script>
 	</div>
 	<textarea id="logbono" style="float:bottom;">bonobono</textarea>
-	<input type="button" value="보기" onclick="motion.face_red(3);" /> 
+	<input type="button" value="보기" id="btn" /> 
+
+	<script type="text/javascript">
+		$('#btn').click(function() {
+			var inp = $('#logbono').val();
+			var t = parse(inp);
+			g_interp.eval(t);
+		});
+	</script>
 
 </body>
 </html>
