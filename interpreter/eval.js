@@ -1,5 +1,5 @@
 
-if (typeof window == 'undefined') {
+if (typeof window === 'undefined') {
 	var sys = require('sys');
 	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
 	var parser = require('./parser.js')
@@ -42,30 +42,72 @@ function Scheduler() {
 	this.queue = [];
 	this.reset_counter();
 }
+Scheduler.prototype.time = function() {
+	return new Date().getTime();
+}
 Scheduler.prototype.reset_counter = function() {
 	this.counter = this.QUANTUM;
 }
-Scheduler.prototype.add = function(k, v) {
-	this.queue[this.queue.length] = {cont: k, cont_res: v};
+Scheduler.prototype.add = function(k, v, opts) {
+	this.queue[this.queue.length] = {cont: k, cont_res: v, opts: opts};
 }
-Scheduler.prototype.pop = function(k, v) {
+Scheduler.prototype.pop_queue = function() {
 	var s = this.queue[0];
 	this.queue = this.queue.slice(1);
 	return s;
 }
-Scheduler.prototype.next = function(k, v) {
-	this.add(k, v);
-	this.reset_counter();
-	return this.pop();
+Scheduler.prototype.runnable = function(s) {
+	var resume_at = 0;
+	if (s.opts) {
+		resume_at = s.opts.resume_at;
+	}
+	return resume_at == 0 || (resume_at > 0 && resume_at <= this.time());
+}
+Scheduler.prototype.pop = function() {
+	var queue = [];
+	var min_resume_time = null;
+	var endcont_res = null;
+	while (true) {
+		var s = this.pop_queue();
+		if (!s) {
+			if (queue.length > 0) {
+				this.queue = queue;
+				return {resume_at: min_resume_time};
+			} else {
+				// HACK: return the last EndCont's result
+				// FIXME: this should return right result for the thread
+				return {cont: Interp.EndCont, cont_res: endcont_res};
+			}
+		}
+
+		if (this.runnable(s)) {
+			if (s.cont.name == 'EndCont') {
+				endcont_res = s.cont_res;
+				continue;
+			}
+			if (queue.length > 0) {
+				this.queue = this.queue.concat(queue);
+			}
+			return s;
+		} else {
+			if (s.opts) {
+				var resume_time = s.opts.resume_at;
+				if (resume_time && (!min_resume_time || resume_time < min_resume_time)) {
+					min_resume_time = resume_time;
+				}
+			}
+			queue[queue.length] = s;
+		}
+	}
 }
 Scheduler.prototype.getnext = function(k, v) {
 	this.counter -= 1;
-	var s = {cont: k, cont_res: v};
-	if (this.counter == 0) {
-		s = this.next(k, v);
-	}
-	while (s.cont.name == 'EndCont' && this.queue.length > 0) {
+	if (this.counter == 0 || k.name == 'EndCont') {
+		this.reset_counter();
+		this.add(k, v);
 		s = this.pop();
+	} else {
+		var s = {cont: k, cont_res: v};
 	}
 	return s;
 }
@@ -77,10 +119,22 @@ function Interp() {
 	this.sched = new Scheduler();
 	this.init();
 }
+Interp.EndCont = {type: 'Continuation', name: 'EndCont',
+	apply: function(result) {
+		return result;
+	}
+};
 Interp.prototype.init = function() {
 	this.global_env['begin'] = native_func(function(interp, args) { return args[args.length - 1]; });
 	this.global_env['concat'] = native_func(function(interp, args) { return args.join(''); });
 	this.global_env['print'] = native_func(function(interp, args) { print(args[0]); return null; });
+
+	this.global_env['sleep'] = native_func(function(interp, args, state) {
+		var resume_at = interp.sched.time() + args[0];
+		interp.sched.add(state.cont, null, {resume_at: resume_at});
+		state.cont = Interp.EndCont;
+		return null;
+	});
 
 	this.global_env['eq'] = native_func(function(interp, args) { return args[0] == args[1]; });
 	this.global_env['gt'] = native_func(function(interp, args) { return args[0] > args[1]; });
@@ -141,7 +195,7 @@ Interp.prototype.evalers = {
 							apply: function(result) {
 //								print('AppCont.apply')
 //								print(result)
-								return function() { return self.apply_func(result, argcont.args, k); };
+								return function() { return self.apply_func(result, argcont.args, k, e); };
 							}
 						}); 
 					};
@@ -199,8 +253,12 @@ Interp.prototype.evalers = {
 
 		return function() { return self.eval_k(body, newenv, k); };
 	},
+	'Start': function(self, t, e, k) {
+		self.sched.add(k, null);
+		return function() { return self.eval_k(t.body, e, Interp.EndCont); };
+	},
 };
-Interp.prototype.apply_func = function(func, args, k) {
+Interp.prototype.apply_func = function(func, args, k, env) {
 	var self = this;
 	if (func.type == 'Func') {
 		var newenv = func.env;
@@ -211,33 +269,60 @@ Interp.prototype.apply_func = function(func, args, k) {
 		}
 		return function() { return self.eval_k(func.body, newenv, k); };
 	} else if (func.type == 'NativeFunc') {
-		return function() {return self.apply_k(k, func.apply(self, args)); };
+		return function() {
+			var state = {
+				cont: k,
+				env: env,
+			};
+			var res = func.apply(self, args, state);
+			return self.apply_k(state.cont, res);
+		};
 	} else {
 		this.error('invalid function type');
 	}
 };
+Interp.prototype.continue_eval = function() {
+	var s = this.sched.pop();
+	var res = s.cont.apply(s.cont_res);
+	while (typeof res == 'function') {
+		res = res();
+	}
+	return res;
+}
+Interp.prototype.make_interp_continuation = function() {
+	return this.continue_eval.bind(this);
+}
 Interp.prototype.apply_k = function(k, v) {
-	s = this.sched.getnext(k, v);
-	return s.cont.apply(s.cont_res);
+	var s = this.sched.getnext(k, v);
+	if (s.cont) {
+		return s.cont.apply(s.cont_res);
+	} else if (s.resume_at) {
+		var interp = this;
+//		print('delay: ' +(s.resume_at - this.sched.time()));
+		setTimeout(this.make_interp_continuation(), s.resume_at - this.sched.time());
+		return null;
+	} else {
+		// cannot happen
+		null = 1;
+	}
 };
 Interp.prototype.eval_k = function(t, e, k) {
 	return this.evalers[t.type](this, t, e, k);
 };
 Interp.prototype.eval = function(t) {
-	res = this.eval_k(t, new Env(null), {type: 'continuation', name: 'endcont', apply: function(result) {return result;}});
-	while(typeof(res) == 'function') {
-//	print('eval loop a')
-//	print(typeof(res))
-		res = res();
-//	print('eval loop b')
-//	print(typeof(res))
-	}
-	return res;
+	var self = this;
+	cont = {type: 'Continuation', name: 'EvalCont',
+		apply: function(result) {
+			return function() { return self.eval_k(t, new Env(null), Interp.EndCont); };
+		}
+	};
+	this.sched.add(cont, null);
+	return this.continue_eval();
 }
 
 
 
-/*
+//*
 //var inp = '((lambda (n1 n2) (add n1 n2)) 4.3 2.1)'
 //var inp = '((lambda (n1 n2) (add n1 n2)) (if true 4.3 0) 2.1)'
 var inp = '(begin (if true '
@@ -260,20 +345,42 @@ inp = '((lambda (n)\n'+
 '		(loop 2)\n'+
 '		)\n'+
 '	) 49)';
-xinp = '(letrec (loop (lambda (v)\n' +
+inp = '(letrec (loop (lambda (v)\n' +
 			'(if (eq v 0)' +
 				'0' +
 				'(add v (loop (sub v 1))))))' +
 			'(loop 100000))';
-t = parser.parse(inp);
-//parser.printlang(t)
-var interp = new Interp();
-//try {
-	r = interp.eval(t);
-	print(r)
-/*} catch (e) {
+inp = '(letrec (print_number'+
+		'(lambda (num)'+
+			'(begin'+
+//				'(print num)'+
+				'(print (concat num "    " (if (eq (mod num 2) 0)  "EVEN"  "ODD")))'+
+//				'(sleep 1000)'+
+				'(sleep (mul num 100))'+
+//				'(sleep (if (eq (mod num 2) 0)  1600  2000))'+
+				'(print_number (add num 2)))))'+
+		'(begin'+
+			'(start (print_number 1))'+
+			'(start (print_number 2))))';
+xinp = '(begin '+
+		'(start (begin (print "a") (sleep 1000) (print "a end")))'+
+		'(start (begin (print "b") (sleep 2000) (print "b end"))))'
+
+try {
+	t = parser.parse(inp);
+} catch (e) {
 	print(e)
-}*/
+	return;
+}
+parser.printlang(t)
+var interp = new Interp();
+try {
+	r = interp.eval(t);
+	print('Result: ' + JSON.stringify(r))
+//*
+} catch (e) {
+	print(e)
+}
 //*/
 
 
