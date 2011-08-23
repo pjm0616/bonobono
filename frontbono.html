@@ -1,14 +1,21 @@
 <html>
 <head>
 <title>Line</title>
-
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
 <script type="text/javascript" src="js/bonobonovector.js"></script>
+<script type="text/javascript" src="js/motion.js"></script>
 
 </head>
 <body>
 	<div id="Canvas Ex">
 		<canvas id="test" width="470" height="630">
 		</canvas>
+	</div>
+	<div id="sound" >
+		<audio id = "vocal" controls autoplay style="display: none;" name="media" src="http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&lang=ko&text=보노"></audio>
+
+		<audio id = "sweat" controls autoplay style="display: none;" name="media" src="data/sweat.mp3"></audio>
+
 	</div>
 	<div id="content">
 		<script type="text/javascript">
@@ -21,13 +28,16 @@
 			face_shake_A = 15;
 			body_shake_speed = 0.5;
 			body_shake_A = 15;
-			body_arm_speed = 5;
-			body_arm_A = 30;
+			//body_arm_speed = 5;
+			//body_arm_A = 30;
 			
-			face_sweat_len = 4;
+			face_sweat_len = 7;
 			
 			setInterval(draw_front,time_interval);
 		</script>
 	</div>
+	<textarea id="logbono" style="float:bottom;">bonobono</textarea>
+	<input type="button" value="듣기" onclick="speak('안녕');" /> 
+
 </body>
 </html>
