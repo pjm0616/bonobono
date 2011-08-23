@@ -33,8 +33,8 @@ Env.prototype.extend = function(name, value) {
 	return newenv;
 }
 
-function native_func(func) {
-	return {type: 'NativeFunc', apply: func};
+function native_func(func, opts) {
+	return {type: 'NativeFunc', apply: func, opts: opts};
 }
 
 function Scheduler() {
@@ -48,8 +48,14 @@ Scheduler.prototype.time = function() {
 Scheduler.prototype.reset_counter = function() {
 	this.counter = this.QUANTUM;
 }
+Scheduler.prototype.add_schedule = function(s) {
+	this.queue[this.queue.length] = s;
+}
 Scheduler.prototype.add = function(k, v, opts) {
-	this.queue[this.queue.length] = {cont: k, cont_res: v, opts: opts};
+	if (opts && opts.resume_at && opts.resume_at < 0) {
+		throw 'must not happen';
+	}
+	this.add_schedule({cont: k, cont_res: v, opts: opts});
 }
 Scheduler.prototype.pop_queue = function() {
 	var s = this.queue[0];
@@ -61,19 +67,28 @@ Scheduler.prototype.runnable = function(s) {
 	if (s.opts) {
 		resume_at = s.opts.resume_at;
 	}
-	return resume_at == 0 || (resume_at > 0 && resume_at <= this.time());
+	return resume_at === 0 || (resume_at > 0 && resume_at <= this.time());
 }
 Scheduler.prototype.pop = function() {
 	var queue = [];
-	var min_resume_time = null;
+	var min_resume_s = null;
 	var endcont_res = null;
 	while (true) {
 		var s = this.pop_queue();
 		if (!s) {
 			if (queue.length > 0) {
+				// all continuations are sleeping
+				if (!min_resume_s) { throw 'must not happen'; }
 				this.queue = queue;
-				return {resume_at: min_resume_time};
+
+				var minopts = min_resume_s.opts;
+				var ret = {do_suspend: true,
+						resume_at: minopts.resume_at,
+						resume_func: minopts.resume_func,
+						s: min_resume_s};
+				return ret;
 			} else {
+				// the queue is empty
 				// HACK: return the last EndCont's result
 				// FIXME: this should return right result for the thread
 				return {cont: Interp.EndCont, cont_res: endcont_res};
@@ -92,8 +107,12 @@ Scheduler.prototype.pop = function() {
 		} else {
 			if (s.opts) {
 				var resume_time = s.opts.resume_at;
-				if (resume_time && (!min_resume_time || resume_time < min_resume_time)) {
-					min_resume_time = resume_time;
+				if (typeof resume_time == 'number') {
+					if (min_resume_s === null) {
+						min_resume_s = s;
+					} else if (resume_time > 0 && resume_time < min_resume_s.opts.resume_at) {
+						min_resume_s = s;
+					}
 				}
 			}
 			queue[queue.length] = s;
@@ -124,6 +143,11 @@ Interp.EndCont = {type: 'Continuation', name: 'EndCont',
 		return result;
 	}
 };
+Interp.HaltCont = {type: 'Continuation', name: 'HaltCont',
+	apply: function(result) {
+		return result;
+	}
+};
 Interp.prototype.init = function() {
 	this.global_env['begin'] = native_func(function(interp, args) { return args[args.length - 1]; });
 	this.global_env['concat'] = native_func(function(interp, args) { return args.join(''); });
@@ -133,6 +157,25 @@ Interp.prototype.init = function() {
 		var resume_at = interp.sched.time() + args[0];
 		interp.sched.add(state.cont, null, {resume_at: resume_at});
 		state.cont = Interp.EndCont;
+		return null;
+	});
+	this.global_env['suspend'] = native_func(function(interp, args, state) {
+		var func = args[0];
+		if (func === undefined) {
+			throw 'arg1 missing';
+		}
+		if (func.type != 'NativeFunc') {
+			throw 'first argument must be NativeFunc';
+		}
+
+		var s = {cont: state.cont, cont_res: null};
+		func.apply(interp, args.slice(1), {
+			set_return_value: function(value) {
+				s.cont_res = value;
+			}
+		});
+		interp.sched.add_schedule(s);
+		state.cont = Interp.HaltCont;
 		return null;
 	});
 
@@ -185,34 +228,33 @@ Interp.prototype.evalers = {
 	},
 	'App': function(self, t, e, k) {
 //		print('App')
-		cont = {type: 'Continuation', name: 'AppArgCont', origargs: t.args, args: [],
-			eval_nextarg: function() {
-//				print('AppArgCont.eval_nextarg')
-				var argcont = this;
-				if (this.origargs.length == 0) {
-					return function() {
-						return self.eval_k(t.func, e, {type: 'Continuation', name: 'AppCont',
+		return function() {
+			return self.eval_k(t.func, e, {type: 'Continuation', name: 'AppCont',
+				apply: function(result) {
+					if (t.args.length == 0 || (result.opts && result.opts.passthru_args === true)) {
+						return function() { return self.apply_func(result, [], k, e); };
+					} else {
+						// evaluate arguments
+						cont = {type: 'Continuation', name: 'AppArgCont', origargs: t.args, args: [],
+							eval_nextarg: function() {
+								var argcont = this;
+								if (this.origargs.length == 0) {
+									return function() { return self.apply_func(result, argcont.args, k, e); };
+								} else {
+									return function() { return self.eval_k(argcont.origargs[0], e, argcont); };
+								}
+							},
 							apply: function(result) {
-//								print('AppCont.apply')
-//								print(result)
-								return function() { return self.apply_func(result, argcont.args, k, e); };
+								this.args[this.args.length] = result;
+								this.origargs = this.origargs.slice(1);
+								return this.eval_nextarg();
 							}
-						}); 
-					};
-				} else {
-					return function() {
-						return self.eval_k(argcont.origargs[0], e, argcont);
-					};
+						};
+						return cont.eval_nextarg();
+					}
 				}
-			},
-			apply: function(result) {
-//				print('AppArgCont.apply')
-				this.args[this.args.length] = result;
-				this.origargs = this.origargs.slice(1);
-				return this.eval_nextarg();
-			}
+			}); 
 		};
-		return cont.eval_nextarg();
 	},
 	'If': function(self, t, e, k) {
 //		print('If')
@@ -283,7 +325,7 @@ Interp.prototype.apply_func = function(func, args, k, env) {
 };
 Interp.prototype.continue_eval = function() {
 	var s = this.sched.pop();
-	var res = s.cont.apply(s.cont_res);
+	var res = this.apply_k_real(s);
 	while (typeof res == 'function') {
 		res = res();
 	}
@@ -293,12 +335,21 @@ Interp.prototype.make_interp_continuation = function() {
 	return this.continue_eval.bind(this);
 }
 Interp.prototype.apply_k = function(k, v) {
-	var s = this.sched.getnext(k, v);
+	if (k.name == 'HaltCont') {
+		// don't reschedule continuations and halt here
+		var s = {cont: k, cont_res: v};
+	} else {
+		var s = this.sched.getnext(k, v);
+	}
+	return this.apply_k_real(s);
+}
+Interp.prototype.apply_k_real = function(s) {
 	if (s.cont) {
 		return s.cont.apply(s.cont_res);
-	} else if (s.resume_at) {
+	} else if (s.do_suspend) {
 		var interp = this;
 //		print('delay: ' +(s.resume_at - this.sched.time()));
+		interp.sched.add(s.s.cont, s.s.cont_res)
 		setTimeout(this.make_interp_continuation(), s.resume_at - this.sched.time());
 		return null;
 	} else {
@@ -323,6 +374,9 @@ Interp.prototype.eval = function(t) {
 
 
 //*
+var interp = new Interp();
+
+
 //var inp = '((lambda (n1 n2) (add n1 n2)) 4.3 2.1)'
 //var inp = '((lambda (n1 n2) (add n1 n2)) (if true 4.3 0) 2.1)'
 var inp = '(begin (if true '
@@ -365,6 +419,17 @@ inp = '(letrec (print_number'+
 xinp = '(begin '+
 		'(start (begin (print "a") (sleep 1000) (print "a end")))'+
 		'(start (begin (print "b") (sleep 2000) (print "b end"))))'
+inp = '(begin'+
+			'(print "A")'+
+			'(print (concat "ret: \'" (suspend delayed_continue 33) "\' end"))'+
+			'(print "B")'+
+		')';
+interp.global_env['delayed_continue'] = native_func(function(interp, args, state) {
+	setTimeout(function() {
+		state.set_return_value('arg0 is: ' + args[0] + ' and time is: ' + interp.sched.time());
+		interp.continue_eval();
+	}, 1000);
+});
 
 try {
 	t = parser.parse(inp);
@@ -373,10 +438,10 @@ try {
 	return;
 }
 parser.printlang(t)
-var interp = new Interp();
+
 try {
 	r = interp.eval(t);
-	print('Result: ' + JSON.stringify(r))
+	print('eval result: ' + JSON.stringify(r))
 //*
 } catch (e) {
 	print(e)

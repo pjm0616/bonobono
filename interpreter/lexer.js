@@ -59,11 +59,11 @@ Lexer.prototype.step = function(ch) {
 
 		} else if ('()'.indexOf(ch) >= 0) {
 			this.append_token(ch)
-		} else if (',.<>?/:[]{\\|`~!@#$%^&*-_=+'.indexOf(ch) >= 0
+		} else if (',.<>?/:[]{\\|`~!@#$%^&*_='.indexOf(ch) >= 0
 				|| (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
 			this.state = 'symbol';
 			this.buf += ch;
-		} else if (ch >= '0' && ch <= '9') {
+		} else if ((ch >= '0' && ch <= '9') || '+-'.indexOf(ch) >= 0) {
 			this.state = 'number';
 			this.buf += ch;
 		} else if (ch == '"') {
@@ -93,6 +93,12 @@ Lexer.prototype.step = function(ch) {
 		if (ch == '"') {
 			this.append_token('literal');
 			this.state = 'start';
+		} else if (ch == '\\') {
+			var ch = this.next();
+			if (ch == '') {
+				this.error('invalid escape sequence');
+			}
+			this.buf += ch;
 		} else if (ch == '\n') {
 			this.error('unterminated string literal')
 		} else {
