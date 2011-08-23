@@ -87,7 +87,7 @@ var sh = {
 		/** Blogger mode flag. */
 		bloggerMode : false,
 		
-		stripBrs : false,
+		stripBrs : true,
 		
 		/** Name of the tag that SyntaxHighlighter will automatically look for. */
 		tagName : 'textarea',
@@ -1144,7 +1144,7 @@ function quickCodeHandler(e)
 		;
 	
 	for (var i = 0; i < lines.length; i++)
-		code.push(lines[i].innerText || lines[i].textContent);
+		code.push(lines[i].value || lines[i].textContent);
 	
 	// using \r instead of \r or \r\n makes this work equally well on IE, FF and Webkit
 	code = code.join('\r');

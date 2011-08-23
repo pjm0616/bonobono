@@ -1,5 +1,5 @@
 
-if (typeof window == 'undefined') {
+if (typeof window === 'undefined') {
 	var sys = require('sys');
 	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
 	var listparser = require('./listparser.js')
@@ -52,9 +52,15 @@ function format_lang(t) {
 	case 'String':
 		return '"' + t.data + '"';
 	case 'If':
-		return 'If(' + format_lang(t.cond) + ', ' + format_lang(t.trueexpr) + ', ' + format_lang(t.falseexpr) + ')';
+		return '(if ' + format_lang(t.cond) + ' ' + format_lang(t.trueexpr) + ' ' + format_lang(t.falseexpr) + ')';
+	case 'Let':
+		return '(let (' + t.varname + ' ' + format_lang(t.expr) + ') ' + format_lang(t.body) + ')';
+	case 'LetRec':
+		return '(letrec (' + t.varname + ' ' + format_lang(t.expr) + ') ' + format_lang(t.body) + ')';
+	case 'Start':
+		return '(start ' + format_lang(t.body) + ')';
 	default:
-		return '???';
+		return '???' + t.type;
 	}
 }
 function printlang(t) {
@@ -154,6 +160,14 @@ var parse_lang;
 		return {type: 'If', cond: cond, trueexpr: trueexpr, falseexpr: falseexpr};
 	}
 
+	function parse_start(t) {
+		var list = t.list;
+		check(list.length, 2, 'list.length is not 2');
+
+		var body = parse_lang(list[1]);
+		return {type: 'Start', body: body};
+	}
+
 	var parsers = {
 		'number': function(t) {
 			return {type: 'Number', value: t.value, pos: t.pos};
@@ -187,6 +201,8 @@ var parse_lang;
 					return parse_letrec(t);
 				} else if (sym == 'if') {
 					return parse_if(t);
+				} else if (sym == 'start') {
+					return parse_start(t);
 				}
 			}
 
