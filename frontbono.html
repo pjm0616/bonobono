@@ -7,7 +7,7 @@
 </head>
 <body>
 	<div id="Canvas Ex">
-		<canvas id="test" width="470" height="630">
+		<canvas id="test" width="600" height="800">
 		</canvas>
 	</div>
 	<div id="content">
@@ -17,14 +17,20 @@
 			// shake 주기 1초
 			// 15도씩 왔다갔다
 			
-			face_shake_speed = 0.5;
+			face_shake_speed = 2;
 			face_shake_A = 15;
-			body_shake_speed = 0.5;
+			body_shake_speed = 1;
 			body_shake_A = 15;
-			body_arm_speed = 5;
+			body_arm_speed = 2;
 			body_arm_A = 30;
 			
 			face_sweat_len = 4;
+			
+			face_eye_state = 1;
+			
+			face_red = 1;
+			
+			face_mouse_speed = 1;
 			
 			setInterval(draw_front,time_interval);
 		</script>
