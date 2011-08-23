@@ -96,7 +96,7 @@ function draw_head(){
 	ctx.fillStyle="rgb(143,208,240)";
 	ctx.strokeStyle="rgb(0,0,0)";
 	ctx.beginPath();
-	ctx.arc(point[0], point[1], 134, pi*2/3 + face_shake_degree, pi/3 + face_shake_degree, false);
+	ctx.arc(point[0], point[1], 134, pi*2/3 + face_shake_degree + body_shake_degree, pi/3 + face_shake_degree + body_shake_degree, false);
 	ctx.stroke();
 	ctx.closePath();
 	ctx.fill();
@@ -285,6 +285,7 @@ function draw_front(){
 			face_shake_A = 15;
 			body_shake_speed = 1;
 			body_shake_A = 15;
+			
 			setInterval(draw_front,time_interval);
 		</script>
 	</div>
