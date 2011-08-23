@@ -180,6 +180,7 @@ Interp.prototype.init = function() {
 	});
 
 	this.global_env['eq'] = native_func(function(interp, args) { return args[0] == args[1]; });
+	this.global_env['ne'] = native_func(function(interp, args) { return args[0] != args[1]; });
 	this.global_env['gt'] = native_func(function(interp, args) { return args[0] > args[1]; });
 	this.global_env['ge'] = native_func(function(interp, args) { return args[0] >= args[1]; });
 	this.global_env['lt'] = native_func(function(interp, args) { return args[0] < args[1]; });
@@ -188,7 +189,12 @@ Interp.prototype.init = function() {
 	this.global_env['add'] = native_func(function(interp, args) { return args[0] + args[1]; });
 	this.global_env['sub'] = native_func(function(interp, args) { return args[0] - args[1]; });
 	this.global_env['mul'] = native_func(function(interp, args) { return args[0] * args[1]; });
+	this.global_env['div'] = native_func(function(interp, args) { return args[0] / args[1]; });
 	this.global_env['mod'] = native_func(function(interp, args) { return args[0] % args[1]; });
+
+	this.global_env['not'] = native_func(function(interp, args) { return !args[0]; });
+	this.global_env['and'] = native_func(function(interp, args) { return args[0] && args[1]; });
+	this.global_env['or'] = native_func(function(interp, args) { return args[0] || args[1]; });
 }
 Interp.prototype.error = function(msg) {
 	print(msg);

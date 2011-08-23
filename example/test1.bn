@@ -1,0 +1,28 @@
+
+(letrec (loop (lambda (func n)
+	(if (gt n 0)
+		(begin
+			(func n)
+			(loop func (sub n 1)))
+		0)
+	))
+	(begin
+		(start (loop (lambda () (begin
+				(setv "face_red" 1)
+				(sleep 2000)
+				(setv "face_red" 0)
+				(sleep 2000)))
+			1000))
+		(start (loop (lambda () (begin
+				(setv "body_shake_speed" 1)
+				(sleep 2000)
+				(setv "body_shake_speed" 0)
+				(sleep 2000)))
+			1000))
+		(start (loop (lambda () (loop (lambda (n) (begin
+					(setv "face_sweat_len" n)
+					(sleep 1000))
+				) 4))
+			1000))
+	))
+
