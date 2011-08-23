@@ -27,7 +27,7 @@
 
 		var keywords =	'loop begin lambda let letrec define if newref getref setref try raise except and or getaddr getvalue';
 					
-		var functions =	'concat speak ' +
+		var functions =	'concat speak print ' +
 										'face-left face-right face-red face-eye face-mouth face-sweat face-shake ' + 
 										'body-left body-right body-shell body-shake body-arm-shake body-walk';
 

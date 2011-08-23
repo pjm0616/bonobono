@@ -3,6 +3,10 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>bonobono</title>
+		<style type="text/css">
+			@font-face { font-family:coding; src:url(NanumCoding.ttf);}
+			.noFocus:focus { 2 outline: none; 3 }
+		 </style>
 		<link rel="stylesheet" type="text/css" href="css/cupertino/jquery-ui-1.8.16.custom.css" />
 		<link rel="stylesheet" type="text/css" href="css/shCore.css" />
 		<link rel="stylesheet" type="text/css" href="css/shCoreDefault.css" />
@@ -24,123 +28,179 @@
 
 		<script type="text/javascript">
 			function highlight() {
-				SyntaxHighlighter.all();
+				SyntaxHighlighter.highlight();
 			}
-			highlight();
+			SyntaxHighlighter.all();
 		</script>
 
 		<script type="text/javascript">
+			var curStart = 0;
+			var curEnd = 0;
 			function reHilight() {
 				var code = $('#orgCode')[0];
 				$('#codeArea')[0].removeChild($('#code')[0]);
 				var tmp = document.createElement('textarea');
 				tmp.id = "code";
-				tmp.setAttribute("class", "brush: Bn");
-				tmp.value = code.value; 
+				tmp.setAttribute("class", "brush: bn");
+				tmp.innerText = code.value;
+				tmp.value = code.value;
 				$('#codeArea')[0].appendChild(tmp);
+				console.log(tmp.value);
 				highlight();
 			}
-			function processKey(event) {
+			function processKey2(e) {
 				var code = $('#orgCode')[0];
+				var input = $('#input')[0];
 				switch(event.which) {
 				case 8:
-					// del
+					// backspace
+					if (curStart == curEnd) {
+						code.value = code.value.substr(0, curStart - 1) + code.value.substr(curEnd);
+						curStart -= curStart > 1?1:0;
+					}
+					else
+						code.value = code.value.substr(0, curStart) + code.value.substr(curEnd);
+					curEnd = curStart;
+					reHilight();
 					break;
 				case 46:
-					// backspace
+					// del
+					if (curStart == curEnd) {
+						code.value = code.value.substr(0, curStart) + code.value.substr(curEnd + 1);
+						curEnd += curEnd < code.value.length?1:0;
+					}
+					else
+						code.value = code.value.substr(0, curStart) + code.value.substr(curEnd);
+					curStart = curEnd;
+					reHilight();
 					break;
 				case 37:
 					//left
-					$('#orgCode')[0].getCurs
+					curStart -= curStart > 1?1:0;
+					if (!e.shiftKey) {
+						curEnd = curStart;
+					}
 					break;
 				case 38:
 					//up
 					break;
 				case 39:
 					//right
+					curEnd += code.value.length > curEnd?1:0;
+					if (!e.shiftKey) {
+						curStart = curEnd;
+					}
 					break;
 				case 40:
 					//down
 					break;
 				default:
-					if ((event.which >= 65 && event.which <= 90) || (event.which >= 48 && event.which <= 57) || event.which == 9) {
-						code.value += String.fromCharCode(event.which);
-						reHilight();
-					}
-					else {
-						//alert(event.which);
-					}
+					if ((event.which >= 65 && event.which <= 90) || (event.which >= 48 && event.which <= 57) || event.which == 9 || event.which == 45 || event.which == 91 ||
+							(event.which >= 187 &&event.which <= 189) || event.which == 16 || event.which == 32 || event.which == 222 || event.which == 13 || event.which == 229)
+						return true;
+					alert(event.which);
 				}
-				return false;
+			}
+			function processKey(event) {
+				var code = $('#orgCode')[0];
+				var input = $('#input')[0];
+				keycode = event.which;
+				if (keycode == 13){
+					code.value += "\r\n";
+				}
+				else if (keycode == 40) {
+					code.value = code.value.substr(0, curStart) + String.fromCharCode(keycode) + ' ' + String.fromCharCode(41)+ code.value.substr(curEnd);
+				}
+				else 
+				{
+					code.value = code.value.substr(0, curStart) + String.fromCharCode(keycode) + code.value.substr(curEnd);
+				}
+				curStart += 1;
+				curEnd = curStart;
+				reHilight();
+				if (keycode == 13 || keycode == 32 || keycode == 40 || keycode == 41)
+				{
+					input.value = "";
+					return false;
+				}
+				return true;
 			}
 		</script>
 
 		<script type="text/javascript">
+			var code = $('#orgCode')[0], input = $('#input')[0];
 			$.fx.speeds._default = 500;
 			$(function() {
-				$("button").button();
-				$("#helpDialog").dialog({
-					autoOpen: false,
-					show: "blind",
-					hide: "blind",
-					width: 400,
-					height: 600,
-					open: (function() {
-						$('#helpDialog').load('help.html');
-					})
-				});
-				$("#helpButton").button().click(function() {
-					if ($("#helpDialog").dialog("isOpen")) {
-						$("#helpDialog").dialog("close");
-					}
-					else {
-						$("#helpDialog").dialog("open");
-					}
-				});
-				$("#clearButton").button().click(function() {
-					$('#codeArea')[0].value = "";
-				});
-				$('#runButton').button().click(function() {
-						var interp = new Interp();
-						alert(interp.eval(parser.parse($('#orgCode')[0].value)));
-						parser = {parse: parse, printlang: printlang};
-				});
-				$("#exampleComboBox").combobox({
-					selected: function(event, ui) {
-						$('#codeArea').load('example/' + $('#exampleComboBox')[0].value);
-					}
-				});
-				var keyword = [
-					"loop",
-					"face-eye",
-					"face-mouth",
-					"face-sweat"
-				];
-				$('#input').autocomplete({
-					source: function(req, responseFn) {
-						var pos = req.term.lastIndexOf(' ');
-						if (req.term.lastIndexOf('\n') > pos)
-							pos = req.term.lastIndexOf('\n');
-						text = req.term.substr(pos + 1);
-						var re = $.ui.autocomplete.escapeRegex(text);
-						var matcher = new RegExp("^" + re);
-						var a = $.grep(keyword, function(item,index){
-							return matcher.test(item);
+					$("button").button();
+					$("#helpDialog").dialog({
+						autoOpen: false,
+						show: "blind",
+						hide: "blind",
+						width: 400,
+						height: 600,
+						open: (function() {
+							$('#helpDialog').load('help.html');
+							})
 						});
-						responseFn( a );
-					},
-					select: function(event, ui){
-						var pos = event.target.value.lastIndexOf(' ');
-						if (event.target.value.lastIndexOf('\n') > pos)
-							pos = event.target.value.lastIndexOf('\n');
-							event.target.value = event.target.value.substr(0, pos + 1) + ui.item.value + ' ';
+					$("#helpButton").button().click(function() {
+						if ($("#helpDialog").dialog("isOpen")) {
+							$("#helpDialog").dialog("close");
+						}
+						else {
+							$("#helpDialog").dialog("open");
+						}
+						});
+					$("#clearButton").button().click(function() {
+						code.value = "";
+						curStart = 0;
+						reHilight();
+						});
+					$('#runButton').button().click(function() {
+						var interp = new Interp();
+						alert(interp.eval(parse($('#orgCode')[0].value)));
+						});
+					$("#exampleComboBox").combobox({
+						selected: function(event, ui) {
+						$('#codeArea').load('example/' + $('#exampleComboBox')[0].value);
+						}
+						});
+					var keyword = [
+						"loop",
+						"face-eye",
+						"face-mouth",
+						"face-sweat",
+						"print"
+							];
+					$('#input').autocomplete({
+						source: function(req, responseFn) {
+							var pos = req.term.lastIndexOf(' ');
+							if (req.term.lastIndexOf('\n') > pos)
+								pos = req.term.lastIndexOf('\n');
+							text = req.term.substr(pos + 1);
+							var re = $.ui.autocomplete.escapeRegex(text);
+							var matcher = new RegExp("^" + re);
+							var a = $.grep(keyword, function(item,index){
+								return matcher.test(item);
+								});
+							responseFn( a );
+							},
+						select: function(event, ui) {
+							var input = $('#input')[0];
+							var code = $('#orgCode')[0];
+							console.log(curStart);
+							console.log(input.selectionStart);
+							code.value = code.value.substr(0, curStart - input.selectionStart) + ui.item.value + code.value.substr(curStart - input.selectionStart + input.value.length);
+							curStart = curStart + ui.item.value.length - input.selectionStart;
+							curEnd = curStart;
+							input.value = "";
 							reHilight();
-						return false;
-					},
-					focus: function(event, ui){
-						return false;
-					}
-				});
+							//alert($('#orgCode'));
+							return false;
+							},
+						focus: function(event, ui){
+							return false;
+							}
+					});
 			});
 		</script>
 	</head>
@@ -155,11 +215,11 @@
 					<option value="dance.bn">Dance</option>
 				</select>
 			</div>
-			<div id="codeArea" style="float: top; width: 400px; height: 600px; border: black solid 1px;">
-				<textarea id="orgCode"></textarea>
-				<textarea id="input" onkeydown="return processKey(event);"></textarea>
-				<textarea class="brush:bn;" id="code" style="float: top; width:400px; height: 600px;">(face-left 123)"asdf"12341234123523451asdfasdfadf</textarea>
-				<textarea id="logbono"></textarea>
+			<div id="codeArea" style="float: top; width: 400px; height: 600px; border: black solid 1px;" onmousedown="$('#input')[0].focus(); return false;">
+				<textarea id="orgCode" style="display: none;"></textarea>
+				<input id="input" class="noFocus" onkeypress="return processKey(event);" onkeydown="return processKey2(event);" style="position: absolute; color: rgba(255, 255, 255, 0); border: 0;" />
+				<textarea class="brush:bn;" id="code" style="float: top; width:400px; height: 600px;"></textarea>
+				<textarea id="logbono" style="float:bottom;"></textarea>
 			</div>
 			<div class="action" style="float: top; font-size:10pt;">
 				<span>
