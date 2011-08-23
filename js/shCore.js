@@ -302,7 +302,7 @@ var sh = {
 	highlight: function(globalParams, element)
 	{
 		var elements = this.findElements(globalParams, element),
-			propertyName = 'innerHTML', 
+			propertyName = 'value', 
 			highlighter = null,
 			conf = sh.config
 			;

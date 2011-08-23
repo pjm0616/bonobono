@@ -5,7 +5,7 @@
 		<title>bonobono</title>
 		<style type="text/css">
 			@font-face { font-family:coding; src:url(NanumCoding.ttf);}
-			.noFocus:focus { 2 outline: none; 3 }
+			.noFocus:focus {outline: none;}
 		 </style>
 		<link rel="stylesheet" type="text/css" href="css/cupertino/jquery-ui-1.8.16.custom.css" />
 		<link rel="stylesheet" type="text/css" href="css/shCore.css" />
@@ -14,6 +14,7 @@
 
 		<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+		<script type="text/javascript" src="js/jquery-timer-1.0.0.js"></script>
 
 		<script type="text/javascript" src="js/XRegExp.js"></script>
 		<script type="text/javascript" src="js/combobox.js"></script>
@@ -21,115 +22,26 @@
 		<script type="text/javascript" src="js/shBrushBn.js"></script>
 		<script type="text/javascript" src="js/shBrushCss.js"></script>
 
+		<script type="text/javascript" src="js/ide.js"></script>
+
 		<script type="text/javascript" src="interpreter/lexer.js"></script>
 		<script type="text/javascript" src="interpreter/listparser.js"></script>
 		<script type="text/javascript" src="interpreter/parser.js"></script>
 		<script type="text/javascript" src="interpreter/eval.js"></script>
 
+		<script type="text/javascript" src="js/bonobonovector.js"></script>
+		<script type="text/javascript" src="js/motion.js"></script>
+
 		<script type="text/javascript">
-			function highlight() {
-				SyntaxHighlighter.highlight();
-			}
 			SyntaxHighlighter.all();
-		</script>
-
-		<script type="text/javascript">
-			var curStart = 0;
-			var curEnd = 0;
-			function reHilight() {
-				var code = $('#orgCode')[0];
-				$('#codeArea')[0].removeChild($('#code')[0]);
-				var tmp = document.createElement('textarea');
-				tmp.id = "code";
-				tmp.setAttribute("class", "brush: bn");
-				tmp.innerText = code.value;
-				tmp.value = code.value;
-				$('#codeArea')[0].appendChild(tmp);
-				console.log(tmp.value);
-				highlight();
-			}
-			function processKey2(e) {
-				var code = $('#orgCode')[0];
-				var input = $('#input')[0];
-				switch(event.which) {
-				case 8:
-					// backspace
-					if (curStart == curEnd) {
-						code.value = code.value.substr(0, curStart - 1) + code.value.substr(curEnd);
-						curStart -= curStart > 1?1:0;
-					}
-					else
-						code.value = code.value.substr(0, curStart) + code.value.substr(curEnd);
-					curEnd = curStart;
-					reHilight();
-					break;
-				case 46:
-					// del
-					if (curStart == curEnd) {
-						code.value = code.value.substr(0, curStart) + code.value.substr(curEnd + 1);
-						curEnd += curEnd < code.value.length?1:0;
-					}
-					else
-						code.value = code.value.substr(0, curStart) + code.value.substr(curEnd);
-					curStart = curEnd;
-					reHilight();
-					break;
-				case 37:
-					//left
-					curStart -= curStart > 1?1:0;
-					if (!e.shiftKey) {
-						curEnd = curStart;
-					}
-					break;
-				case 38:
-					//up
-					break;
-				case 39:
-					//right
-					curEnd += code.value.length > curEnd?1:0;
-					if (!e.shiftKey) {
-						curStart = curEnd;
-					}
-					break;
-				case 40:
-					//down
-					break;
-				default:
-					if ((event.which >= 65 && event.which <= 90) || (event.which >= 48 && event.which <= 57) || event.which == 9 || event.which == 45 || event.which == 91 ||
-							(event.which >= 187 &&event.which <= 189) || event.which == 16 || event.which == 32 || event.which == 222 || event.which == 13 || event.which == 229)
-						return true;
-					alert(event.which);
-				}
-			}
-			function processKey(event) {
-				var code = $('#orgCode')[0];
-				var input = $('#input')[0];
-				keycode = event.which;
-				if (keycode == 13){
-					code.value += "\r\n";
-				}
-				else if (keycode == 40) {
-					code.value = code.value.substr(0, curStart) + String.fromCharCode(keycode) + ' ' + String.fromCharCode(41)+ code.value.substr(curEnd);
-				}
-				else 
-				{
-					code.value = code.value.substr(0, curStart) + String.fromCharCode(keycode) + code.value.substr(curEnd);
-				}
-				curStart += 1;
-				curEnd = curStart;
-				reHilight();
-				if (keycode == 13 || keycode == 32 || keycode == 40 || keycode == 41)
-				{
-					input.value = "";
-					return false;
-				}
-				return true;
-			}
-		</script>
-
-		<script type="text/javascript">
 			var code = $('#orgCode')[0], input = $('#input')[0];
 			$.fx.speeds._default = 500;
+			jQuery(function($) {
+				$(this).everyTime(500, 'cursur', function() {
+
+					$('#cursur').fadeIn(250).fadeOut(250);
+				});
+			});
 			$(function() {
 					$("button").button();
 					$("#helpDialog").dialog({
@@ -157,11 +69,13 @@
 						});
 					$('#runButton').button().click(function() {
 						var interp = new Interp();
-						alert(interp.eval(parse($('#orgCode')[0].value)));
+						interp.eval(parse($('#orgCode')[0].value));
 						});
 					$("#exampleComboBox").combobox({
 						selected: function(event, ui) {
-						$('#codeArea').load('example/' + $('#exampleComboBox')[0].value);
+							$('#orgCode').load('example/' + $('#exampleComboBox')[0].value);
+							curStart = curEnd = 0;
+							reHilight();
 						}
 						});
 					var keyword = [
@@ -172,6 +86,10 @@
 						"print"
 							];
 					$('#input').autocomplete({
+						open: function(event, ui) {
+						$(this).next().css('left', $('#input')[0].style['left']);
+						$(this).next().css('top', $('#input')[0].style['top']);
+							},
 						source: function(req, responseFn) {
 							var pos = req.term.lastIndexOf(' ');
 							if (req.term.lastIndexOf('\n') > pos)
@@ -215,10 +133,13 @@
 					<option value="dance.bn">Dance</option>
 				</select>
 			</div>
-			<div id="codeArea" style="float: top; width: 400px; height: 600px; border: black solid 1px;" onmousedown="$('#input')[0].focus(); return false;">
+			<div id="codeArea" style="float: top; width: 400px; height: 600px; border: black solid 1px; background-color: white; overflow-y: scroll;" onmousedown="$('#input')[0].focus(); return false;">
 				<textarea id="orgCode" style="display: none;"></textarea>
-				<input id="input" class="noFocus" onkeypress="return processKey(event);" onkeydown="return processKey2(event);" style="position: absolute; color: rgba(255, 255, 255, 0); border: 0;" />
+				<input id="input" class="noFocus" onkeypress="return processKey(event);" onkeydown="return processKey2(event);" style="position: absolute; color: rgba(255, 255, 255, 0); border: 0; z-index: -1;" />
 				<textarea class="brush:bn;" id="code" style="float: top; width:400px; height: 600px;"></textarea>
+				<div id="cursur" style="position: absolute; background-color: black; width: 2px; height: 16px; z-index: 90; left: 808px; top: 62px;">&nbsp;</div>
+			</div>
+			<div>
 				<textarea id="logbono" style="float:bottom;"></textarea>
 			</div>
 			<div class="action" style="float: top; font-size:10pt;">
@@ -234,7 +155,9 @@
 			</div>
 		</div>
 		<div id="hiddenDiv" style="hidden: true;">
-			<audio id="audio" style="hidden: true;">This browser doesn't support audio tag!</audio>
+			<audio id="vocal" style="hidden: true;">This browser doesn't support audio tag!</audio>
+			<audio id="effect" style="hidden: true;">This browser doesn't support audio tag!</audio>
+			<audio id="bgm" style="hidden: true;">This browser doesn't support audio tag!</audio>
 		</div>
 		<div id="helpDialog" title="help">
 		</div>
