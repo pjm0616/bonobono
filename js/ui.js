@@ -32,8 +32,7 @@ $(function() {
 		reHilight();
 	});
 	$('#runButton').button().click(function() {
-		var interp = new Interp();
-		interp.eval(parse($('#orgCode')[0].value));
+		g_interp.eval(parse($('#orgCode')[0].value));
 	});
 	$("#exampleComboBox").combobox({
 		selected: function(event, ui) {
@@ -43,10 +42,10 @@ $(function() {
 							}
 	});
 	var keyword = [
-		"loop", "rand", "concat", "speak", "face-left", "face-right",
-		"face-red", "face-eye", "face-mouth", "face-sweat", "face-shake",
-		"body-left", "body-right", "body-shell", "body-shake", "body-arm-shake",
-		"body-walk", "lambda", "begin", "if", "true", "false", "let", "letrec",
+		"loop", "rand", "concat", "speak", "face_left", "face_right",
+		"face_red", "face_eye", "face_mouth", "face_sweat", "face_shake",
+		"body_left", "body_right", "body_shell", "body_shake", "body_arm_shake",
+		"body_walk", "lambda", "begin", "if", "true", "false", "let", "letrec",
 		"try", "raise", "except", "newref", "getref", "setref", "and", "or",
 		"eq", "lt", "gt", "add", "mul", "sub", "mod", "div", "pow", "print"];
 	$('#input').autocomplete({

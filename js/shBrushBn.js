@@ -28,8 +28,8 @@
 		var keywords =	'loop begin lambda let letrec define if newref getref setref try raise except and or getaddr getvalue';
 					
 		var functions =	'concat speak print ' +
-										'face-left face-right face-red face-eye face-mouth face-sweat face-shake ' + 
-										'body-left body-right body-shell body-shake body-arm-shake body-walk';
+										'face_left face_right face_red face_eye face_mouth face_sweat face_shake ' + 
+										'body_left body_right body_shell body_shake body_arm_shake body_walk';
 
 		this.regexList = [
 			{ regex: SyntaxHighlighter.regexLib.doubleQuotedString,		css: 'string' },			// strings
