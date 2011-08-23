@@ -371,11 +371,9 @@ Interp.prototype.eval = function(t) {
 	return this.continue_eval();
 }
 
+
 /*
-
-//*
 var interp = new Interp();
-
 
 //var inp = '((lambda (n1 n2) (add n1 n2)) 4.3 2.1)'
 //var inp = '((lambda (n1 n2) (add n1 n2)) (if true 4.3 0) 2.1)'
@@ -447,3 +445,4 @@ try {
 	print(e)
 }
 //*/
+
