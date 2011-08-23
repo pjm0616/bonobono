@@ -1,0 +1,53 @@
+<html><head>
+<script type="application/javascript" src="../js/jquery-1.6.2.min.js"></script>
+<script type="application/javascript" src="lexer.js"></script>
+<script type="application/javascript" src="listparser.js"></script>
+<script type="application/javascript" src="parser.js"></script>
+<script type="application/javascript" src="eval.js"></script>
+
+<script type="application/javascript">
+
+var g_interp, g_state;
+g_interp = new Interp();
+
+g_interp.global_env['alert'] = native_func(function(interp, args) {
+	alert(args[0]);
+});
+g_interp.global_env['prompt'] = native_func(function(interp, args) {
+	return prompt(args[0]);
+});
+g_interp.global_env['set_suspend_state'] = native_func(function(interp, args, state) {
+	g_state = state;
+});
+
+inp = '(alert (concat "you pressed " (suspend set_suspend_state) " button"))'
+inp = '(letrec (loop (lambda ()'+
+		'(begin'+
+			'(alert (concat "you pressed " (suspend set_suspend_state) " button"))'+
+			'(loop))))'+
+		'(loop))'
+t = parse(inp)
+r = g_interp.eval(t);
+
+</script>
+</head><body>
+
+<input type="button" id="left" value="왼쪽" />
+<input type="button" id="right" value="오른쪽" />
+
+<script type="text/javascript">
+
+$('#left').click(function() {
+	g_state.set_return_value('left');
+	g_interp.continue_eval();
+});
+$('#right').click(function() {
+	g_state.set_return_value('right');
+	g_interp.continue_eval();
+});
+
+
+</script>
+
+</body></html>
+
