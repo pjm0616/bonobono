@@ -354,7 +354,7 @@ Interp.prototype.apply_k_real = function(s) {
 		return null;
 	} else {
 		// cannot happen
-		null = 1;
+		throw 'Cannot happen';
 	}
 };
 Interp.prototype.eval_k = function(t, e, k) {
