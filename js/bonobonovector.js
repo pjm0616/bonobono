@@ -94,7 +94,7 @@ function draw_head(){
 	ctx.beginPath();
 	ctx.arc(point[0], point[1], 134, pi*2/3 + face_shake_degree + body_shake_degree, pi/3 + face_shake_degree + body_shake_degree, false);
 	ctx.stroke();
-	ctx.closePath();
+	ctx.arc(point[0], point[1], 134, 0, pi * 2, false);
 	ctx.fill();
 }
 
