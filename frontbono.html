@@ -17,11 +17,16 @@
 	var g_interp = new Interp();
 	register_funcs(g_interp, motion);
 
+	var global = this;
 	var funcs = {
 		'alert': alert,
 		'prompt': function(msg) {
 			return prompt(msg);
 		},
+		'setv': function(name, value) {
+			var code = name + ' = ' + JSON.stringify(value) + ';';
+			eval(code);
+		}
 	};
 	register_funcs(g_interp, funcs);
 </script>
@@ -29,7 +34,7 @@
 </head>
 <body>
 	<div id="Canvas Ex">
-		<canvas id="test" width="600" height="800">
+		<canvas id="screen" width="600" height="800">
 		</canvas>
 	</div>
 	<div id="sound" >
@@ -42,7 +47,7 @@
 		<script type="text/javascript">
 			init_data();
 			
-			// shake 주기 1�		// 15�씩 �다갔다
+			// shake 주기 1??		// 15�씩 �다갔다
 			
 			face_shake_speed = 0;
 			face_shake_A = 15;
@@ -63,14 +68,21 @@
 			
 		</script>
 	</div>
+	<textarea id="code" style="float:bottom; width: 50em; height: 8em;"></textarea>
 	<textarea id="logbono" style="float:bottom;">bonobono</textarea>
 	<input type="button" value="보기" id="btn" /> 
 
 	<script type="text/javascript">
-		$('#btn').click(function() {
-			var inp = $('#logbono').val();
+		function run() {
+			var inp = $('#code').val();
 			var t = parse(inp);
 			g_interp.eval(t);
+		}
+		$('#btn').click(run);
+		$('#code').keypress(function(e) {
+			if (e.which == 13) {
+				run();
+			}
 		});
 	</script>
 

@@ -361,6 +361,10 @@ Interp.prototype.eval_k = function(t, e, k) {
 	return this.evalers[t.type](this, t, e, k);
 };
 Interp.prototype.eval = function(t) {
+	if (!t) {
+		return null;
+	}
+
 	var self = this;
 	cont = {type: 'Continuation', name: 'EvalCont',
 		apply: function(result) {

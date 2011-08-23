@@ -14,7 +14,6 @@ function reHilight() {
 	tmp.setAttribute("z-index", 10);
 	$('#codeArea')[0].appendChild(tmp);
 	tmp.value = code.value;
-	console.log(tmp.value);
 	moveInput();
 	highlight();
 }
@@ -24,13 +23,11 @@ function moveInput() {
 	var coord = curPosition2coord();
 	$('#input').css('left', coord[0] - (input.value.length * 8));
 	$('#input').css('top', coord[1]);
-	console.log(coord);
-	console.log(input.style);
 	$('#cursur').css('left', coord[0] + 8);
 	$('#cursur').css('top', coord[1] - 3);
 }
 function curPosition2coord() {
-	var code = $('#orgCode')[0].value.substr(0, curStart);
+	var code = $('#orgCode')[0].value.substr(0, curStart).replace(/[ㄱ-힣]/, 'aa');
 	var line = 0;
 	var col = 0;
 	rest = 0;
@@ -50,7 +47,13 @@ function curPosition2coord() {
 function processKey2(e) {
 	var code = $('#orgCode')[0];
 	var input = $('#input')[0];
-	switch(event.which) {
+	if(window.event) // IE
+		keycode = e.keyCode
+	else if(e.which) // Netscape/Firefox/Opera
+		keycode = e.which
+
+	console.log("down" + keycode);
+	switch(keycode) {
 	case 8:
 		// backspace
 		if (curStart == curEnd) {
@@ -94,21 +97,29 @@ function processKey2(e) {
 		//down
 		break;
 	default:
-		if ((event.which >= 65 && event.which <= 90) || (event.which >= 48 && event.which <= 57) || event.which == 9 || event.which == 45 || event.which == 91 ||
-				(event.which >= 187 &&event.which <= 189) || event.which == 16 || event.which == 32 || event.which == 222 || event.which == 13 || event.which == 229)
+		if ((keycode >= 65 && keycode <= 90) || (keycode >= 48 && keycode <= 57) || keycode == 9 || keycode == 45 || keycode == 91 ||
+				(keycode >= 187 &&keycode <= 189) || keycode == 16 || keycode == 32 || keycode == 222 || keycode == 13 || keycode == 229)
 			return true;
 	}
 	moveInput();
 }
-function processKey(event) {
+function processKey(e) {
 	var code = $('#orgCode')[0];
 	var input = $('#input')[0];
-	keycode = event.which;
+	if(window.event) // IE
+		keycode = e.keyCode
+	else if(e.which) // Netscape/Firefox/Opera
+		keycode = e.which
+
+	console.log(keycode);
+	if (keycode >= 37 && keycode < 40) {
+		return false;
+	}
 	if (keycode == 13){
 		code.value = code.value.substr(0, curStart) +  "\n" + code.value.substr(curEnd);
 	}
 	else if (keycode == 40) {
-		code.value = code.value.substr(0, curStart) + String.fromCharCode(keycode) + ' ' + String.fromCharCode(41)+ code.value.substr(curEnd);
+		code.value = code.value.substr(0, curStart) + '( )'+ code.value.substr(curEnd);
 	}
 	else 
 	{
@@ -122,7 +133,6 @@ function processKey(event) {
 		input.value = "";
 		return false;
 	}
-	console.log(keycode);
 	return true;
 }
 

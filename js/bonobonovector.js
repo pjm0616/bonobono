@@ -28,11 +28,11 @@ var body_shake_degree, body_arm_degree;
 
 
 function iniCanvas(){
-	canvas=document.getElementById("test");
+	canvas=document.getElementById("screen");
 	ctx=canvas.getContext("2d");
-	ctx.font = "20px Arial";
+	ctx.font = "20px coding";
 	ctx.lineWidth = 3;
-	ctx.clearRect(0,0,1000,1000);
+	ctx.clearRect(0,0,800,680);
 }
 
 function init_data(){
@@ -69,7 +69,7 @@ function init_data(){
 
 function resize_point(point){
 	for( var i = 0 ; i < point.length ; i++ ) {
-//		point[i] *= 0.8;
+//		point[i] *= 0.2;
 		point[i] += 50;
 	}
 	return point
