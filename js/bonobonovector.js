@@ -15,14 +15,13 @@ var body_arm_speed, body_arm_A;
 var time, time_interval;
 
 var face_eye_time, face_sweat_time;
-var face_axis_x, face_axis_y;
-var face_org_x, face_org_y;
+var face_axis = new Array();
 var face_shake_degree;
 
 
-var body_axis_x, body_axis_y;
-var body_arm_left_axis_x, body_arm_left_axis_y;
-var body_arm_right_axis_x, body_arm_right_axis_y;
+var body_axis = new Array();
+var body_arm_left_axis = new Array();
+var body_arm_right_axis = new Array();
 var body_shake_degree, body_arm_degree;
 
 
@@ -31,6 +30,7 @@ function iniCanvas(){
 	canvas=document.getElementById("test");
 	ctx=canvas.getContext("2d");
 	ctx.font = "20px Arial";
+	ctx.lineWidth = 3;
 	ctx.clearRect(0,0,1000,1000);
 }
 
@@ -52,12 +52,11 @@ function init_data(){
 	face_eye_time = 0;
 	face_sweat_time = 0;
 	face_axis = [ 227, 200 ];
-	face_org = [ 227, 200 ];
 	face_shake_degree = 0;
 		
 	body_axis = [ 227, 600 ];
-	body_arm_left = [ 130, 390 ];
-	body_arm_right = [ 320, 390 ];
+	body_arm_left_axis = [ 150, 390 ];
+	body_arm_right_axis = [ 300, 390 ];
 	body_shake_degree = 0;
 	body_arm_degree = 0;
 }
@@ -86,9 +85,9 @@ function get_degree(){
 }
 
 function draw_head(){
+	ctx.lineWidth = 6;
 	var point = new Array();
-	point = rotate_point(face_axis,face_org,face_shake_degree);
-	point = rotate_point(body_axis,point,body_shake_degree);
+	point = rotate_point(body_axis,face_axis,body_shake_degree);
 	ctx.fillStyle="rgb(143,208,240)";
 	ctx.strokeStyle="rgb(0,0,0)";
 	ctx.beginPath();
@@ -96,6 +95,7 @@ function draw_head(){
 	ctx.stroke();
 	ctx.arc(point[0], point[1], 134, 0, pi * 2, false);
 	ctx.fill();
+	ctx.lineWidth = 3;
 }
 
 function draw_body(){
@@ -200,18 +200,38 @@ function draw_leftarm(){
 	ctx.fillStyle="rgb(143,208,240)";
 	ctx.strokeStyle="rgb(0,0,0)";
 
-	var point = [144.9819, 346.0355, 157.9802, 379.03139999999996, 219.9725, 389.0301, 230.9711, 392.0298, 220.9724, 400.0288, 236.9704, 405.0281, 220.9724, 411.0274, 232.9709, 415.0269, 216.9729, 422.026, 178.9776, 447.0229, 116.9854, 413.0271];
-	point = rotate_point(body_axis,point,body_shake_degree);
-	
-	ctx.beginPath();
-	ctx.moveTo(point[0], point[1]);
-	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
-	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
-	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
-	ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
-	ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
-	ctx.fill();
-	ctx.stroke();
+	if( body_arm_A == 0 ) {
+		var point = [144.9819, 346.0355, 157.9802, 379.03139999999996, 219.9725, 389.0301, 230.9711, 392.0298, 220.9724, 400.0288, 236.9704, 405.0281, 220.9724, 411.0274, 232.9709, 415.0269, 216.9729, 422.026, 178.9776, 447.0229, 116.9854, 413.0271];
+		point = rotate_point(body_axis,point,body_shake_degree);
+		
+		ctx.beginPath();
+		ctx.moveTo(point[0], point[1]);
+		ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+		ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+		ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+		ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+		ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	else {
+		var left_axis = new Array();
+		left_axis = rotate_point(body_axis, body_arm_left_axis, body_shake_degree);
+		var point = [120.98240000000001, 348.0353, 66.9891, 337.0366, 24.9944, 300.0413, 6.996600000000001, 297.0416, 18.9951, 310.04, 2.9970999999999997, 305.0406, 12.995899999999999, 319.0389, -2.0023000000000017, 317.0391, 7.996500000000001, 327.0379, 12.995899999999999, 351.0349, 97.9852, 412.02729999999997];
+		point = rotate_point(body_axis, point, body_shake_degree );
+		point = rotate_point(left_axis, point, body_arm_degree*-1 );
+		
+		ctx.beginPath();
+		ctx.moveTo(point[0], point[1]);
+		ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+		ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+		ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+		ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+		ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+		ctx.fill();
+		ctx.stroke();
+
+	}
 	
 }
 
@@ -219,33 +239,109 @@ function draw_rightarm(){
 	ctx.fillStyle="rgb(143,208,240)";
 	ctx.strokeStyle="rgb(0,0,0)";
 	
-	var point = [306.9616, 346.0355, 285.9642, 382.031, 249.9687, 380.0313, 235.9705, 386.03049999999996, 247.969, 392.0298, 232.9709, 400.0288, 245.9692, 406.028, 235.9705, 413.0271, 247.969, 417.02660000000003, 267.9665, 444.0233, 332.9584, 413.0271];
-	point = rotate_point(body_axis,point,body_shake_degree);
-	
-	ctx.beginPath();
-	ctx.moveTo(point[0], point[1]);
-	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
-	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
-	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
-	ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
-	ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
-	ctx.fill();
-	ctx.stroke();
+	if ( body_arm_A == 0 ) {
+		var point = [306.9616, 346.0355, 285.9642, 382.031, 249.9687, 380.0313, 235.9705, 386.03049999999996, 247.969, 392.0298, 232.9709, 400.0288, 245.9692, 406.028, 235.9705, 413.0271, 247.969, 417.02660000000003, 267.9665, 444.0233, 332.9584, 413.0271];
+		point = rotate_point(body_axis, point, body_shake_degree);
+		
+		ctx.beginPath();
+		ctx.moveTo(point[0], point[1]);
+		ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+		ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+		ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+		ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+		ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	else {	
+		var right_axis = new Array();
+		right_axis = rotate_point(body_axis, body_arm_right_axis, body_shake_degree);
+		var point = [328.9614, 346.0355, 404.9519, 345.0356, 429.9487, 314.0395, 444.9469, 310.04, 438.9476, 320.0388, 452.9459, 319.0389, 444.9469, 327.0379, 457.0467, 323.181, 452.9235, 332.8018, 445.129, 355.4364, 355.6848, 412.17330000000004];
+		point = rotate_point(body_axis, point, body_shake_degree);
+		point = rotate_point(right_axis, point, body_arm_degree);
+		
+		ctx.beginPath();
+		ctx.moveTo(point[0], point[1]);
+		ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+		ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+		ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+		ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+		ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+		ctx.fill();
+		ctx.stroke();
 
+	}
 }
 
 function draw_shell(){
-	var point = [243.9695, 352.0348, 153.9807, 412.02729999999997, 242.9696, 454.022, 263.967, 472.01980000000003, 262.9671, 405.0281, 266.9666, 343.0359, 243.9695, 352.0348];
+	ctx.fillStyle="rgb(215,129,154)";
+
+	if ( body_arm_A == 0 ) {
+		var point = [243.9695, 352.0348, 153.9807, 412.02729999999997, 242.9696, 454.022, 263.967, 472.01980000000003, 262.9671, 405.0281, 266.9666, 343.0359, 243.9695, 352.0348];
+		point = rotate_point(body_axis,point,body_shake_degree);
+	
+		ctx.beginPath();
+		ctx.moveTo(point[0], point[1]);
+		ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+		ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+		ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	else {
+		var point = [243.9695, 352.0348, 153.9807, 412.02729999999997, 242.9696, 454.022, 263.967, 472.01980000000003, 262.9671, 405.0281, 266.9666, 343.0359, 243.9695, 352.0348];
+		for( var i = 0 ; i < point.length ; i+=2 ) {
+			point[i] += 190;
+			point[i+1] -= 70;
+		}
+		point = rotate_point(body_axis,point,body_shake_degree);
+		
+		var right_axis = new Array();
+		right_axis = rotate_point(body_axis, body_arm_right_axis, body_shake_degree);
+		point = rotate_point(right_axis, point, body_arm_degree);
+	
+		ctx.beginPath();
+		ctx.moveTo(point[0], point[1]);
+		ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+		ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+		ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+		ctx.fill();
+		ctx.stroke();
+	}
+}
+
+function draw_ddam(){
+	ctx.fillStyle="rgb(255,255,255)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	var point = [87.989, 117.06410000000005, 62.9921, 88.06780000000003, 97.9877, 102.06600000000003, 104.9869, 93.06709999999998, 79.99, 62.071000000000026, 115.9855, 81.06859999999995, 121.9847, 71.06989999999996, 101.9872, 43.07339999999999, 132.9834, 61.0711];
 	point = rotate_point(body_axis,point,body_shake_degree);
 
-	ctx.fillStyle="rgb(215,129,154)";
-	ctx.beginPath();
-	ctx.moveTo(point[0], point[1]);
-	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
-	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
-	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
-	ctx.fill();
-	ctx.stroke();
+	var speed = 1/15;
+	var hei = 25;
+	var ver = [ hei, hei ];
+	
+	for( var i = 0 ; i < face_sweat_len ; i++ ) {
+		ver[0] = Math.abs( hei * i + ( time * speed ) ) % ( hei * face_sweat_len ) * -1 ;
+		ver[1] = Math.abs( hei * i + ( time * speed ) ) % ( hei * face_sweat_len ) * -1 ;
+
+		ctx.beginPath();
+		ctx.moveTo(point[0] + ver[0], point[1] + ver[1]);
+		ctx.quadraticCurveTo(point[2] + ver[0], point[3] + ver[1], point[4] + ver[0], point[5] + ver[1]);
+		ctx.stroke();
+		ctx.fill();
+		
+		ctx.beginPath();
+		ctx.moveTo(point[6] + ver[0], point[7] + ver[1]);
+		ctx.quadraticCurveTo(point[8] + ver[0], point[9] + ver[1], point[10] + ver[0], point[11] + ver[1]);
+		ctx.stroke();
+		ctx.fill();
+		
+		ctx.beginPath();
+		ctx.moveTo(point[12] + ver[0], point[13] + ver[1]);
+		ctx.quadraticCurveTo(point[14] + ver[0], point[15] + ver[1], point[16] + ver[0], point[17] + ver[1]);
+		ctx.stroke();
+		ctx.fill();
+	}
 }
 
 function draw_front(){
@@ -261,4 +357,5 @@ function draw_front(){
 	draw_rightarm();
 	draw_shell();
 	draw_leftarm();
+	draw_ddam();
 }
