@@ -24,9 +24,14 @@ function face_right()
 	set_log("face right : ['>");
 }
 
+function stop_face_red()
+{
+	face_red = 0;
+}
 function face_red()
 {
 	set_log("face red : ['_']");
+	face_red = 1;
 }
 
 function face_eye(n,sec)
