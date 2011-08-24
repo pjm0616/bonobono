@@ -52,28 +52,17 @@ var motion = {
 	{
 		set_log("face sweat : n = " + n);
 		speak_elemnt = document.getElementById("effect");
-		speak_elemnt.src = "data/sweat.mp3" ;
+		speak_elemnt.src = "data/sweat.mp3";
 		speak_elemnt.play();
 
 		face_sweat_len = n;
-
-		$(document).oneTime(1000 * n, function(){
-			face_sweat_len = 0;
-		});
-
-
 	},
 
 	face_shake: function(speed,sec)
 	{
 		set_log("face shake : speed = " + speed + " | sec = " + sec);
-		face_shake_speed = speed;
+		face_shake_speed = 0.5;
 		face_shake_A = 15;
-
-		$(document).oneTime(1000 * sec, function(){
-			face_shake_speed = 0;
-			face_shake_A = 0;
-		});
 	},
 
 	body_left: function()
@@ -97,30 +86,17 @@ var motion = {
 	{
 		set_log("body shake : speed = " + speed + " | deg = " + deg);
 	
-		face_shake_speed = speed;
-		face_shake_A = deg;
-		body_shake_speed = speed;
-		body_shake_A = deg;
-
-		$(document).oneTime(1000 * 5, function(){
-			face_shake_speed = 0;
-			face_shake_A = 0;
-			body_shake_speed = 0;
-			body_shake_A = 0;
-		});
-
+		face_shake_speed = 0.5;
+		face_shake_A = 15;
+		body_shake_speed = 0.5;
+		body_shake_A = 15;
 	},
 
 	body_arm_shake: function(speed,deg)
 	{
 		set_log("body arm shake : speed = " + speed + " | deg = " + deg);
-		body_arm_speed = speed;
-		body_arm_A = deg;
-
-		$(document).oneTime(1000 * 5, function(){
-			body_arm_speed = 0;
-			body_arm_A = 0;
-		});
+		body_arm_speed = 0.5;
+		body_arm_A = 30;
 	},
 
 	body_walk: function(speed,sec)
