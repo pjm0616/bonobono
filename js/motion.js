@@ -128,5 +128,7 @@ var motion = {
 		set_log("body walk : speed = " + speed + " | sec = " + sec);
 		body_walk_dir = 0;
 	}
+
+	susepend: function()
 }
 
