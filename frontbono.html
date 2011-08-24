@@ -2,7 +2,10 @@
 <head>
 <title>Line</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+
 <script type="application/javascript" src="js/jquery-1.6.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+		<script type="text/javascript" src="js/jquery-timer-1.0.0.js"></script>
 
 <script type="application/javascript" src="interpreter/lexer.js"></script>
 <script type="application/javascript" src="interpreter/listparser.js"></script>
@@ -11,10 +14,41 @@
 <script type="application/javascript" src="interpreter/eval.js"></script>
 <script type="application/javascript" src="interpreter/util.js"></script>
 
+
+
 <script type="text/javascript" src="js/bonobonovector.js"></script>
 <script type="text/javascript" src="js/motion.js"></script>
 
 <script type="text/javascript">
+
+function showSelectionDialog(content, callback, data) {
+	$('#userInputDialog').dialog({
+		autoOpen: true,
+		show: "blind",
+		hide: "blind",
+		resizable: false,
+		draggable: false,
+		width: 400,
+		open: (function() {
+			$('#userInputDialog')[0].innerHTML = '<p>' + content + '</p>';
+			console.log(data);
+			for (var i in data) {
+				var button = document.createElement('button');
+				button.innerText = data[i];
+				button.id = "button" + data[i];
+				$('#userInputDialog')[0].appendChild(button);
+				$('#button' + data[i]).button().click(function() {
+
+							$('#userInputDialog').dialog('close');
+							$('#userInputDialog').dialog('destroy');
+							callback(data[i]);
+						});
+				$('#button' + data[i]).css('width', 375);
+			}
+		})
+	});
+}
+
 	var g_interp = new Interp();
 	var g_state;
 	register_funcs(g_interp, motion);
@@ -36,6 +70,16 @@
 	g_interp.global_env['wait_event'] = native_func(function(interp, args, state) {
 		g_suspended[args[0]] = state;
 	});
+
+	
+	g_interp.global_env['choice'] = native_func(function(interp, args, state) {
+		alert("aa");
+		var callback = (function(name, args, state) {
+			return function(selected) { state.do_return(selected); }
+		})(args[0], args.slice(1), state);
+		showSelectionDialog(args[0],callback,args.slice(1));
+	});
+
 	var return_event = function(name, retv) {
 		var s = g_suspended[name];
 		g_suspended[name] = null;
@@ -51,6 +95,8 @@
 		<canvas id="screen" width="600" height="800">
 		</canvas>
 	</div>
+				<div id="userInputDialog" title="input">
+			</div>
 	<div id="sound" >
 		<audio id = "vocal" controls autoplay style="display: none;" name="media" src="http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&lang=ko&text=보노"></audio>
 
@@ -85,8 +131,8 @@
 	<textarea id="code" style="float:right; width: 40em; height: 50em;"></textarea>
 	<textarea id="logbono" style="float:bottom; height: 40em;"></textarea>
 	<input type="button" value="보기" id="btn" />
-	<input type="button" id="faster" value="빠르�" />
-	<input type="button" id="slower" value="�리� "/>
+	<input type="button" id="faster" value="" />
+	<input type="button" id="slower" value=""/>
 
 	<script type="text/javascript">
 		function run() {
