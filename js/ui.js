@@ -40,7 +40,7 @@ $(function() {
 			  url: 'example/' + $('#exampleComboBox')[0].value,
 			  context: document.body,
 			  success: function(data){
-				    $('#orgCode')[0].innerHTML = data;
+				    $('#orgCode')[0].innerHTML = data.replace(/\t/g, '\ \ \ \ ');
 						curStart = curEnd = 0;
 						console.log($('#orgCode')[0].value);
 						reHilight();
@@ -54,7 +54,10 @@ $(function() {
 		"body_left", "body_right", "body_shell", "body_shake", "body_arm_shake",
 		"body_walk", "lambda", "begin", "if", "true", "false", "let", "letrec",
 		"try", "raise", "except", "newref", "getref", "setref", "and", "or",
-		"eq", "lt", "gt", "add", "mul", "sub", "mod", "div", "pow", "print"];
+		"eq", "lt", "gt", "add", "mul", "sub", "mod", "div", "pow", "print",
+		"sleep", "suspend", "getglobal", "setglobal", "ne", "ge", "le", "not",
+		"infloop", "forloop-step", "forloop", "floor", "random", "list-new", "list-get",
+		"list-set", "list-len", "list-foreach"];
 	$('#input').autocomplete({
 		delay: 100,
 		open: function(event, ui) {

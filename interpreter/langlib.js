@@ -88,10 +88,48 @@ function loadlibs(interp) {
 						'(func (list-get lst n)))))'
 		);
 	};
+	var load_dict = function() {
+		add_native_func('dict-new', function(interp, args, state) {
+			if (args.length % 2 != 0) {
+				state.runtime_error('argument length should be even number')
+			}
+
+			var dict = {};
+			for (var i = 0; i < args.length; i += 2) {
+				dict[args[i]] = args[i + 1];
+			}
+			return dict;
+		});
+		add_native_func('dict-get', function(interp, args, state) {
+			if (args.length != 2) { state.runtime_error('args.lenth != 2') }
+			return args[0][args[1]];
+		});
+		add_native_func('dict-set', function(interp, args, state) {
+			if (args.length != 3) { state.runtime_error('args.lenth != 3') }
+			return args[0][args[1]] = args[2];
+		});
+		add_native_func('dict-keys', function(interp, args, state) {
+			if (args.length != 1) { state.runtime_error('args.lenth != 1') }
+			var keys = [];
+			var dict = args[0];
+			for (var key in dict) {
+				keys[keys.length] = key;
+			}
+			return keys;
+		});
+
+		add_func('dict-foreach',
+			'(lambda (dict func)'+
+				'(list-foreach (dict-keys dict) (lambda (k)'+
+					'(func k (dict-get dict k))'+
+				')))'
+		);
+	};
 
 	load_etc();
 	load_math();
 	load_list();
+	load_dict();
 }
 
 exports.loadlibs = loadlibs;
