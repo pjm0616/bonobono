@@ -180,6 +180,10 @@ Interp.prototype.init = function() {
 			set_return_value: function(value) {
 				s.suspended = false;
 				s.cont_res = value;
+			},
+			do_return: function(value) {
+				this.set_return_value(value);
+				interp.continue_eval('suspend_return')
 			}
 		});
 		interp.sched.add_schedule(s);
@@ -337,24 +341,24 @@ Interp.prototype.apply_func = function(func, args, k, env) {
 		this.error('invalid function type');
 	}
 };
-Interp.prototype.continue_eval = function(debug) {
+Interp.prototype.continue_eval = function(called_by) {
 	if (this.running) {
-		logmsg('already running')
+//		logmsg('already running')
 		return null;
 	} else if (this.scheduled_eval) {
-		logmsg('cancelling scheduled eval ' + this.scheduled_eval)
+//		logmsg('cancelling scheduled eval ' + this.scheduled_eval)
 		clearTimeout(this.scheduled_eval);
 		this.scheduled_eval = null;
 	}
 	this.running = true;
-	logmsg('eval start: ' + debug)
+//	logmsg('eval start: ' + called_by)
 	var s = this.sched.pop();
 	var res = this.apply_k_real(s);
 	while (typeof res == 'function') {
 		res = res();
 	}
 	this.running = false;
-	logmsg('eval end: ' + debug)
+//	logmsg('eval end: ' + called_by)
 	return res;
 }
 Interp.prototype.make_interp_continuation = function() {
@@ -364,7 +368,6 @@ Interp.prototype.apply_k = function(k, v) {
 	if (k.name == 'HaltCont') {
 		// don't reschedule continuations and halt here
 		var s = {cont: k, cont_res: v};
-		logmsg('halting interpreter')
 	} else {
 		var s = this.sched.getnext(k, v);
 	}
@@ -375,7 +378,7 @@ Interp.prototype.apply_k_real = function(s) {
 		return s.cont.apply(s.cont_res);
 	} else if (s.resume_at) {
 //		print('delay: ' +(s.resume_at - this.sched.time()));
-		logmsg('delay: '+(s.resume_at - this.sched.time()))
+//		logmsg('delay: '+(s.resume_at - this.sched.time()))
 
 		var interp = this;
 		this.scheduled_eval = setTimeout(function() {
@@ -403,7 +406,7 @@ Interp.prototype.eval = function(t) {
 		}
 	};
 	this.sched.add(cont, null);
-	return this.continue_eval();
+	return this.continue_eval('eval');
 }
 
 

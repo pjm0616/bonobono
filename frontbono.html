@@ -102,12 +102,10 @@
 		});
 
 		$('#faster').click(function() {
-			g_state.set_return_value('fast');
-			g_interp.continue_eval('ev');
+			g_state.do_return('fast');
 		});
 		$('#slower').click(function() {
-			g_state.set_return_value('slow');
-			g_interp.continue_eval('ev');
+			g_state.do_return('slow');
 		});
 
 	</script>
