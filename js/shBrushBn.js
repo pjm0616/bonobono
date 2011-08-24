@@ -23,18 +23,23 @@
 	{
 		// Copyright 2006 Shin, YoungJin
 	
-		var datatypes =	'and or eq lt gt add mul sub mod div pow';
+		var datatypes =	'and or eq lt gt add mul sub mod div pow ge le';
 
-		var keywords =	'loop begin lambda let letrec define if newref getref setref try raise except and or getaddr getvalue';
+		var keywords =	'begin lambda let letrec define if newref getref setref try raise except and or getaddr getvalue';
 					
-		var functions =	'concat speak print ' +
+		var functions =	'concat speak print sleep suspend ' +
+										'floor random ' +
+										'loop forloop-step infloop forloop '+
+										'getglobal setglobal ' +
+										'start ' +
+										'list-new list-get list-set list-len list-foreach ' +
 										'face_left face_right face_red face_eye face_mouth face_sweat face_shake ' + 
 										'body_left body_right body_shell body_shake body_arm_shake body_walk';
 
 		this.regexList = [
 			{ regex: SyntaxHighlighter.regexLib.doubleQuotedString,		css: 'string' },			// strings
 			{ regex: SyntaxHighlighter.regexLib.singleQuotedString,		css: 'string' },			// strings
-			{ regex: new RegExp("[0-9]+", 'gm'), 											css: 'number' },
+			{ regex: new RegExp("-?[0-9]+\.?[0-9]*", 'gm'), 											css: 'number' },
 			{ regex: new RegExp(this.getKeywords(datatypes), 'gm'),		css: 'constants bold' },
 			{ regex: new RegExp(this.getKeywords(functions), 'gm'),		css: 'functions bold' },
 			{ regex: new RegExp(this.getKeywords(keywords), 'gm'),		css: 'keyword bold' }

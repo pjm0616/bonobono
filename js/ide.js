@@ -30,9 +30,13 @@ function moveInput() {
 	$('#input').css('top', coord[1]);
 	$('#cursur').css('left', coord[0] + 8);
 	$('#cursur').css('top', coord[1] - 3);
+	findPairPh();
 }
-function curPosition2coord() {
-	var code = $('#orgCode')[0].innerHTML.substr(0, curStart).replace(/[ㄱ-ㅎㅏ-ㅢ가-힣]/g, '\t\t');
+function curPosition2coord(pos) {
+	if (typeof pos == "undefined") {
+		pos = curStart;
+	}
+	var code = $('#orgCode')[0].innerHTML.substr(0, pos).replace(/[ㄱ-ㅎㅏ-ㅢ가-힣]/g, '\t\t');
 	var line = 0;
 	var col = 0;
 	rest = 0;
@@ -50,6 +54,41 @@ function curPosition2coord() {
 		line += 1;
 	}
 	return [(col) * 8 + 800, (line) * 16 + 46];
+}
+
+function findPairPh() {
+	var leftCode = $('#orgCode')[0].innerHTML.substr(0, curStart);
+	var rightCode = $('#orgCode')[0].innerHTML.substr(curStart - 1);
+	var depth = -1;
+	while(leftCode && depth != 0) {
+		depth += leftCode.substr(-1)=='('?1:(leftCode.substr(-1)==')'?-1:0);
+		leftCode = leftCode.substr(0, leftCode.length - 1);
+	}
+	if (depth != 0) {
+		$('#leftPh').css('visibility', 'hidden');
+		$('#rightPh').css('visibility', 'hidden');
+		return;
+	}
+	depth = -1;
+	while(rightCode && depth != 0) {
+		depth -= rightCode.substr(1,1)=='('?1:(rightCode.substr(1,1)==')'?-1:0);
+		rightCode = rightCode.substr(1);
+	}
+	if (depth != 0) {
+		$('#leftPh').css('visibility', 'hidden');
+		$('#rightPh').css('visibility', 'hidden');
+		return;
+	}
+	var leftPos = curPosition2coord(leftCode.length + 1);
+	var rightPos = curPosition2coord($('#orgCode')[0].innerHTML.length - rightCode.length + 1);
+	$('#leftPh').css('left', leftPos[0]);
+	$('#leftPh').css('top', leftPos[1] - 3);
+	$('#rightPh').css('left', rightPos[0]);
+	$('#rightPh').css('top', rightPos[1] - 3);
+	$('#leftPh').css('visibility', 'visible');
+	$('#rightPh').css('visibility', 'visible');
+	
+	console.log(leftCode.length + ' ' + ($('#orgCode')[0].innerHTML.length -  rightCode.length));
 }
 
 function ohiDoubleJamo(a,c,d) {
@@ -143,13 +182,43 @@ function ohiKeypress(e) {
 		if (e.preventDefault) e.preventDefault();
 		return false;
 	}
-	if (ohiStatus.innerHTML.substr(0,2)!='En' && c>32 && c<127 && e.keyCode<127 && !e.altKey && !e.ctrlKey) {
+	if (ohiStatus.innerHTML.substr(0,2)!='En' && c>32 && c<127 && e.keyCode<127 && !e.altKey && !e.ctrlKey && c!=40 && c!=13) {
 		if (c>64 && c<91 && !e.shiftKey) c+=32;
 		if (c>96 && c<123 && e.shiftKey) c-=32;
 		if (curEnd - curStart !=1) ohiQ=Array(0,0,0,0,0,0);
 		while (swaped[i] && swaped[i]!=c) i+=2;
 		if (i!=swaped.length) c=swaped[i+1];
 		if (ohiStatus.innerHTML.substr(0,2)=='Ko') ohiHangul2(c);
+	}
+	else if (c == 13) {
+		if (ohiQ[0]||ohiQ[1]||ohiQ[2]||ohiQ[3]||ohiQ[4]||ohiQ[5]) {
+			curStart +=1;
+			moveInput();
+		}
+		ohiQ = Array(0,0,0,0,0,0);
+		var f = $('#orgCode')[0];
+		var endText = f.innerHTML.substr(curEnd,f.value.length);
+		f.innerHTML = f.innerHTML.substr(0, curStart) + String.fromCharCode(13);
+		f.innerHTML += endText;
+		curStart += 1;
+		curEnd = curStart;
+		moveInput();
+		reHilight();
+	}
+	else if (c == 40) {
+		if (ohiQ[0]||ohiQ[1]||ohiQ[2]||ohiQ[3]||ohiQ[4]||ohiQ[5]) {
+			curStart +=1;
+			moveInput();
+		}
+		ohiQ = Array(0,0,0,0,0,0);
+		var f = $('#orgCode')[0];
+		var endText = f.innerHTML.substr(curEnd,f.value.length);
+		f.innerHTML = f.innerHTML.substr(0, curStart) + '()';
+		f.innerHTML += endText;
+		curStart += 1;
+		curEnd = curStart;
+		moveInput();
+		reHilight();
 	}
 	else if (ohiStatus.innerHTML.substr(0,2) == 'En' || c == 32)
 	{
@@ -159,7 +228,7 @@ function ohiKeypress(e) {
 		}
 		ohiQ = Array(0,0,0,0,0,0);
 		ohiInsert("En", c);
-	}
+	}	
 	if (e.preventDefault) e.preventDefault();
 	return false;
 }
