@@ -56,7 +56,6 @@ Lexer.prototype.step = function(ch) {
 		this.token_srcpos = this.srcpos;
 		this.buf = '';
 		if (ch == '' || ' \t\n'.indexOf(ch) >= 0) {
-
 		} else if ('()'.indexOf(ch) >= 0) {
 			this.append_token(ch)
 		} else if (',.<>?/:[]{\\|`~!@#$%^&*_='.indexOf(ch) >= 0
@@ -99,7 +98,7 @@ Lexer.prototype.step = function(ch) {
 				this.error('invalid escape sequence');
 			}
 			this.buf += ch;
-		} else if (ch == '\n') {
+		} else if (ch == '' || ch == '\n') {
 			this.error('unterminated string literal')
 		} else {
 			this.buf += ch;

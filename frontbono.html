@@ -34,6 +34,8 @@
 	g_interp.global_env['wait_for_button'] = native_func(function(interp, args, state) {
 		g_state = state;
 	});
+	g_interp.global_env['test'] = g_interp.eval(parse('(lambda () (alert "test"))'))
+
 </script>
 
 </head>
@@ -76,8 +78,8 @@
 	<textarea id="code" style="float:right; width: 40em; height: 50em;"></textarea>
 	<textarea id="logbono" style="float:bottom; height: 40em;"></textarea>
 	<input type="button" value="보기" id="btn" />
-	<input type="button" id="faster" value="빠르게" />
-	<input type="button" id="slower" value="느리게" />
+	<input type="button" id="faster" value="빠르� />
+	<input type="button" id="slower" value="�리� />
 
 	<script type="text/javascript">
 		function run() {
