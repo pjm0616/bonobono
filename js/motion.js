@@ -6,12 +6,14 @@ function set_log(str)
 }
 
 var motion = {
-	speak: function(str)
+	speak: function(msg, speed, pitch)
 	{
-		set_log("speak :"+str);
+		if (speed === undefined) { var speed = 100; }
+		if (pitch === undefined) { var pitch = 100; }
+		set_log("speak :"+msg);
 		speak_elemnt = document.getElementById("vocal");
 
-		speak_elemnt.src = "http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&lang=ko&text="+encodeURIComponent(str);
+		speak_elemnt.src = "http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&lang=ko&pitch="+pitch+"&speed="+speed+"&text="+encodeURIComponent(msg);
 		speak_elemnt.load();
 		speak_elemnt.play();
 	},

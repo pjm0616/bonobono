@@ -266,37 +266,37 @@ Interp.prototype.getenv = function(e, name, origin) {
 }
 Interp.prototype.evalers = {
 	'Number': function(self, t, e, k) {
-		return function() { return self.apply_k(k, t.value); };
+		return function() { return self._apply_k(k, t.value); };
 	},
 	'Bool': function(self, t, e, k) {
-		return function() { return self.apply_k(k, t.value); };
+		return function() { return self._apply_k(k, t.value); };
 	},
 	'String': function(self, t, e, k) {
-		return function() { return self.apply_k(k, t.data); };
+		return function() { return self._apply_k(k, t.data); };
 	},
 	'Var': function(self, t, e, k) {
-		return function() { return self.apply_k(k, self.getenv(e, t.name, t)); };
+		return function() { return self._apply_k(k, self.getenv(e, t.name, t)); };
 	},
 	'Abs': function(self, t, e, k) {
 //		print('Abs')
-		return function() { return self.apply_k(k, {type: 'Func', vars: t.vars, body: t.body, env: e, _pos: t.pos}); };
+		return function() { return self._apply_k(k, {type: 'Func', vars: t.vars, body: t.body, env: e, _pos: t.pos}); };
 	},
 	'App': function(self, t, e, k) {
 //		print('App')
 		return function() {
-			return self.eval_k(t.func, e, {type: 'Continuation', name: 'AppCont', _pos: t.pos,
+			return self._eval_k(t.func, e, {type: 'Continuation', name: 'AppCont', _pos: t.pos,
 				apply: function(result) {
 					if (t.args.length == 0 || (result.opts && result.opts.passthru_args === true)) {
-						return function() { return self.apply_func(result, [], k, e, t); };
+						return function() { return self._apply_func(result, [], k, e, t); };
 					} else {
 						// evaluate arguments
 						cont = {type: 'Continuation', name: 'AppArgCont', _pos: t.pos, origargs: t.args, args: [],
 							eval_nextarg: function() {
 								var argcont = this;
 								if (this.origargs.length == 0) {
-									return function() { return self.apply_func(result, argcont.args, k, e, t); };
+									return function() { return self._apply_func(result, argcont.args, k, e, t); };
 								} else {
-									return function() { return self.eval_k(argcont.origargs[0], e, argcont); };
+									return function() { return self._eval_k(argcont.origargs[0], e, argcont); };
 								}
 							},
 							apply: function(result) {
@@ -321,20 +321,20 @@ Interp.prototype.evalers = {
 				} else {
 					expr = t.falseexpr;
 				}
-				return function() { return self.eval_k(expr, e, k); }
+				return function() { return self._eval_k(expr, e, k); }
 			}
 		};
-		return function() { return self.eval_k(t.cond, e, cont); };
+		return function() { return self._eval_k(t.cond, e, cont); };
 	},
 	'Let': function(self, t, e, k) {
 		// varname, expr, body
 		cont = {type: 'Continuation', name: 'LetCont', _pos: t.pos,
 			apply: function(result) {
 				var newenv = e.extend(t.varname, result);
-				return function() { return self.eval_k(t.body, newenv, k); };
+				return function() { return self._eval_k(t.body, newenv, k); };
 			}
 		};
-		return function() { return self.eval_k(t.expr, e, cont); };
+		return function() { return self._eval_k(t.expr, e, cont); };
 	},
 	'LetRec': function(self, t, e, k) {
 		// t: varname, expr, body
@@ -348,14 +348,14 @@ Interp.prototype.evalers = {
 		var func = {type: 'Func', vars: params, body: funcbody, env: newenv, _pos: t.expr.pos};
 		newenv.let(varname, func);
 
-		return function() { return self.eval_k(body, newenv, k); };
+		return function() { return self._eval_k(body, newenv, k); };
 	},
 	'Start': function(self, t, e, k) {
 		self.sched.add(k, null);
-		return function() { return self.eval_k(t.body, e, Interp.EndCont); };
+		return function() { return self._eval_k(t.body, e, Interp.EndCont); };
 	},
 };
-Interp.prototype.apply_func = function(func, args, k, env, origin) {
+Interp.prototype._apply_func = function(func, args, k, env, origin) {
 	// arg5(origin): for position information in error message
 	var self = this;
 	if (func.type == 'Func') {
@@ -365,15 +365,19 @@ Interp.prototype.apply_func = function(func, args, k, env, origin) {
 			var arg = args[i]
 			newenv = newenv.extend(varname, arg);
 		}
-		return function() { return self.eval_k(func.body, newenv, k); };
+		return function() { return self._eval_k(func.body, newenv, k); };
 	} else if (func.type == 'NativeFunc') {
 		return function() {
 			var state = {
 				cont: k,
 				env: env,
+				origin: origin,
+				runtime_error: function(msg) {
+					self.runtime_error(this.origin, msg);
+				},
 			};
 			var res = func.apply(self, args, state);
-			return self.apply_k(state.cont, res);
+			return self._apply_k(state.cont, res);
 		};
 	} else {
 		this.runtime_error(origin, 'apply_func: invalid function type: cannot apply to ' + typeof func + '(' + func.type + ')');
@@ -391,7 +395,7 @@ Interp.prototype.continue_eval = function(called_by) {
 	this.running = true;
 //	logmsg('eval start: ' + called_by)
 	var s = this.sched.pop();
-	var res = this.apply_k_real(s);
+	var res = this._apply_k_real(s);
 	while (typeof res == 'function') {
 		res = res();
 	}
@@ -402,16 +406,16 @@ Interp.prototype.continue_eval = function(called_by) {
 Interp.prototype.make_interp_continuation = function() {
 	return this.continue_eval.bind(this);
 }
-Interp.prototype.apply_k = function(k, v) {
+Interp.prototype._apply_k = function(k, v) {
 	if (k.name == 'HaltCont') {
 		// don't reschedule continuations and halt here
 		var s = {cont: k, cont_res: v};
 	} else {
 		var s = this.sched.getnext(k, v);
 	}
-	return this.apply_k_real(s);
+	return this._apply_k_real(s);
 }
-Interp.prototype.apply_k_real = function(s) {
+Interp.prototype._apply_k_real = function(s) {
 	if (s.cont) {
 		return s.cont.apply(s.cont_res);
 	} else if (s.resume_at) {
@@ -429,20 +433,33 @@ Interp.prototype.apply_k_real = function(s) {
 		throw 'Cannot happen';
 	}
 };
-Interp.prototype.eval_k = function(t, e, k) {
+Interp.prototype._eval_k = function(t, e, k) {
 	return this.evalers[t.type](this, t, e, k);
 };
-Interp.prototype.eval = function(t) {
+Interp.prototype.make_eval_continuation = function(t, e, k) {
 	if (!t) {
 		return null;
+	}
+	if (!e) {
+		e = new Env(null);
+	}
+	if (!k) {
+		k = Interp.EndCont;
 	}
 
 	var self = this;
 	cont = {type: 'Continuation', name: 'EvalCont',
 		apply: function(result) {
-			return function() { return self.eval_k(t, new Env(null), Interp.EndCont); };
+			return function() { return self._eval_k(t, e, k); };
 		}
 	};
+	return cont;
+}
+Interp.prototype.eval = function(t, e, k) {
+	var cont = this.make_eval_continuation(t, e, k);
+	if (!cont) {
+		return null;
+	}
 	this.sched.add(cont, null);
 	return this.continue_eval('eval');
 }
@@ -523,6 +540,17 @@ inp = '(begin'+
 			'(print "-----")'+
 			'(list-foreach t print)'+
 			'(print "=====")'+
+		')';
+inp = '(begin'+
+			'(setglobal "d" (dict-new "a" 1 "b" "EE" "c" 3))'+
+			'(dict-set d "d" 4)'+
+			'(dict-set d "e" 5)'+
+			'(print (dict-get d "b"))'+
+			'(print "-----")'+
+			'(print (dict-keys d))'+
+			'(print "-----")'+
+			'(dict-foreach d (lambda (k v) (print (concat k ", " v)) ))'+
+			'(print "-----")'+
 		')';
 
 interp.global_env['delayed_continue'] = native_func(function(interp, args, state) {
