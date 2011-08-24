@@ -223,9 +223,19 @@ Interp.prototype.init = function() {
 	this.global_env['and'] = native_func(function(interp, args) { return args[0] && args[1]; });
 	this.global_env['or'] = native_func(function(interp, args) { return args[0] || args[1]; });
 }
-Interp.prototype.error = function(msg) {
-	print(msg);
-	throw msg;
+
+Interp.prototype.throw_exc = function(exc) {
+	print(exc);
+	throw exc;
+}
+Interp.prototype.runtime_error = function(t, msg) {
+	if (t && t._pos) {
+		var pos = t._pos[0] + ', ' + t._pos[1];
+	} else {
+		var pos = 'unknown';
+	}
+	var msg = 'runtime error near (' + pos + '): ' + msg;
+	this.throw_exc(msg);
 }
 
 Interp.prototype.set_global = function(name, value) {
@@ -240,16 +250,17 @@ Interp.prototype.make_native_func = function(func) {
 
 Interp.prototype.check_type = function(t, type) {
 	if (t.type != type) {
-		this.error('Type not matched: expected ' + type + ', got ' + t.type);
+		this.runtime_error(t, 'Type not matched: expected ' + type + ', got ' + t.type);
 	}
 }
-Interp.prototype.getenv = function(e, name) {
+Interp.prototype.getenv = function(e, name, origin) {
+	// arg3(origin): for error message
 	var res = e.get(name);
 	if (res == null) {
 		res = this.get_global(name);
 	}
 	if (res == null) {
-		this.error('getenv: no such name: ' + name);
+		this.runtime_error(origin, 'getenv: no such name: ' + name);
 	}
 	return res;
 }
@@ -264,22 +275,22 @@ Interp.prototype.evalers = {
 		return function() { return self.apply_k(k, t.data); };
 	},
 	'Var': function(self, t, e, k) {
-		return function() { return self.apply_k(k, self.getenv(e, t.name)); };
+		return function() { return self.apply_k(k, self.getenv(e, t.name, t)); };
 	},
 	'Abs': function(self, t, e, k) {
 //		print('Abs')
-		return function() { return self.apply_k(k, {type: 'Func', vars: t.vars, body: t.body, env: e}); };
+		return function() { return self.apply_k(k, {type: 'Func', vars: t.vars, body: t.body, env: e, _pos: t.pos}); };
 	},
 	'App': function(self, t, e, k) {
 //		print('App')
 		return function() {
-			return self.eval_k(t.func, e, {type: 'Continuation', name: 'AppCont',
+			return self.eval_k(t.func, e, {type: 'Continuation', name: 'AppCont', _pos: t.pos,
 				apply: function(result) {
 					if (t.args.length == 0 || (result.opts && result.opts.passthru_args === true)) {
 						return function() { return self.apply_func(result, [], k, e); };
 					} else {
 						// evaluate arguments
-						cont = {type: 'Continuation', name: 'AppArgCont', origargs: t.args, args: [],
+						cont = {type: 'Continuation', name: 'AppArgCont', _pos: t.pos, origargs: t.args, args: [],
 							eval_nextarg: function() {
 								var argcont = this;
 								if (this.origargs.length == 0) {
@@ -302,7 +313,7 @@ Interp.prototype.evalers = {
 	},
 	'If': function(self, t, e, k) {
 //		print('If')
-		cont = {type: 'Continuation', name: 'IfCondCont',
+		cont = {type: 'Continuation', name: 'IfCondCont', _pos: t.pos,
 			apply: function(result) {
 				var expr;
 				if(result == true) {
@@ -317,7 +328,7 @@ Interp.prototype.evalers = {
 	},
 	'Let': function(self, t, e, k) {
 		// varname, expr, body
-		cont = {type: 'Continuation', name: 'LetCont',
+		cont = {type: 'Continuation', name: 'LetCont', _pos: t.pos,
 			apply: function(result) {
 				var newenv = e.extend(t.varname, result);
 				return function() { return self.eval_k(t.body, newenv, k); };
@@ -334,7 +345,7 @@ Interp.prototype.evalers = {
 		var body = t.body;
 
 		var newenv = new Env(e);
-		var func = {type: 'Func', vars: params, body: funcbody, env: newenv};
+		var func = {type: 'Func', vars: params, body: funcbody, env: newenv, _pos: t.expr.pos};
 		newenv.let(varname, func);
 
 		return function() { return self.eval_k(body, newenv, k); };
@@ -364,7 +375,7 @@ Interp.prototype.apply_func = function(func, args, k, env) {
 			return self.apply_k(state.cont, res);
 		};
 	} else {
-		this.error('invalid function type');
+		this.runtime_error(func, 'apply_func: invalid function type: cannot apply to ' + typeof func + '(' + func.type + ')');
 	}
 };
 Interp.prototype.continue_eval = function(called_by) {
