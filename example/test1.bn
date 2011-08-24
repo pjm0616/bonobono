@@ -27,8 +27,8 @@
 		(start (loop (lambda () (begin
 				(let (res (suspend wait_for_button))
 					(if (eq res "fast")
-						(alert res)
-						(alert "asdf"))
+						(setv "body_arm_speed" 2)
+						(setv "body_arm_speed" 0))
 				)))
 			1000))
 	))
