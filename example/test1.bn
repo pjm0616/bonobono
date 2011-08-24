@@ -26,7 +26,7 @@
 			(sleep 1000)))
 			4))))
 	(start (infloop (lambda () (begin
-		(let (res (suspend wait_for_button))
+		(let (res (suspend wait_event "speed"))
 			(if (eq res "fast")
 				(setv "body_arm_speed" 2)
 				(setv "body_arm_speed" 0))

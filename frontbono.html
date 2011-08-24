@@ -32,9 +32,15 @@
 	};
 	register_funcs(g_interp, funcs);
 
-	g_interp.global_env['wait_for_button'] = native_func(function(interp, args, state) {
-		g_state = state;
+	var g_suspended = {};
+	g_interp.global_env['wait_event'] = native_func(function(interp, args, state) {
+		g_suspended[args[0]] = state;
 	});
+	var return_event = function(name, retv) {
+		var s = g_suspended[name];
+		g_suspended[name] = null;
+		s.do_return(retv);
+	}
 	g_interp.global_env['test'] = g_interp.eval(parse('(lambda () (alert "test"))'))
 
 </script>
@@ -105,10 +111,10 @@
 		});
 
 		$('#faster').click(function() {
-			g_state.do_return('fast');
+			return_event('speed', 'fast');
 		});
 		$('#slower').click(function() {
-			g_state.do_return('slow');
+			return_event('speed', 'slow');
 		});
 
 	</script>

@@ -105,7 +105,7 @@ var parse_lang;
 			args[args.length] = parse_lang(targlist[i])
 		}
 
-		return {type: 'App', func: func, args: args};
+		return {type: 'App', func: func, args: args, _pos: t.pos};
 	}
 	function parse_lambda(t) {
 		//check_type(t, 'list');
@@ -124,7 +124,7 @@ var parse_lang;
 		}
 
 		body = parse_lang(list[2])
-		return {type: 'Abs', vars: vars, body: body};
+		return {type: 'Abs', vars: vars, body: body, _pos: t.pos};
 	}
 	function parse_let(t) {
 		//check_type(t, 'list');
@@ -145,7 +145,7 @@ var parse_lang;
 		}
 
 		var body = parse_lang(list[2]);
-		return {type: 'Let', varname: varname, expr: expr, body: body};
+		return {type: 'Let', varname: varname, expr: expr, body: body, _pos: t.pos};
 	}
 	function parse_letrec(t) {
 		var res = parse_let(t);
@@ -161,7 +161,7 @@ var parse_lang;
 		var cond = parse_lang(list[1]);
 		var trueexpr = parse_lang(list[2]);
 		var falseexpr = parse_lang(list[3]);
-		return {type: 'If', cond: cond, trueexpr: trueexpr, falseexpr: falseexpr};
+		return {type: 'If', cond: cond, trueexpr: trueexpr, falseexpr: falseexpr, _pos: t.pos};
 	}
 
 	function parse_start(t) {
@@ -169,23 +169,23 @@ var parse_lang;
 		check(t, list.length, 2, 'list.length is not 2');
 
 		var body = parse_lang(list[1]);
-		return {type: 'Start', body: body};
+		return {type: 'Start', body: body, _pos: t.pos};
 	}
 
 	var parsers = {
 		'number': function(t) {
-			return {type: 'Number', value: t.value, pos: t.pos};
+			return {type: 'Number', value: t.value, _pos: t.pos};
 		},
 		'symbol': function(t) {
 			var sym = t.symbol;
 			if (sym == 'true' || sym == 'false') {
 				var value = (sym == 'true') ? true : false;
-				return {type: 'Bool', value: value, pos: t.pos};
+				return {type: 'Bool', value: value, _pos: t.pos};
 			}
-			return {type: 'Var', name: sym, pos: t.pos};
+			return {type: 'Var', name: sym, _pos: t.pos};
 		},
 		'literal': function(t) {
-			return {type: 'String', data: t.string, pos: t.pos};
+			return {type: 'String', data: t.string, _pos: t.pos};
 		},
 		'list': function(t) {
 			var list = t.list;
