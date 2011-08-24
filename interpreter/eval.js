@@ -214,7 +214,7 @@ Interp.prototype.check_type = function(t, type) {
 	}
 }
 Interp.prototype.getenv = function(e, name) {
-	res = e.get(name);
+	var res = e.get(name);
 	if (res == null) {
 		res = this.global_env[name];
 	}
@@ -290,10 +290,10 @@ Interp.prototype.evalers = {
 		cont = {type: 'Continuation', name: 'LetCont',
 			apply: function(result) {
 				var newenv = e.extend(t.varname, result);
-				return function() { return self.eval_k(t.body, k); };
+				return function() { return self.eval_k(t.body, newenv, k); };
 			}
 		};
-		return function() { return self.eval_k(t.expr, cont); };
+		return function() { return self.eval_k(t.expr, e, cont); };
 	},
 	'LetRec': function(self, t, e, k) {
 		// t: varname, expr, body
