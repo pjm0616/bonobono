@@ -11,25 +11,26 @@ function Lexer(inp) {
 	this.inp = inp;
 
 	this.pos = 0;
-	this.srcpos = [1, 1]; // current porition in the input
+	this.srcpos = [1, 1, 0]; // current porition in the input
 	this.ch = '';
 
-	this.token_srcpos = [1, 1]; // current token's position in the input
+	this.token_srcpos = [1, 1, 0]; // current token's position in the input [row, col, pos]
 	this.state = 'start';
 	this.buf = ''
 
 	this.tokens = [];
 }
 Lexer.prototype.next = function() {
-	if (this.ch != '') {
-		if (this.ch == '\n') {
-			this.srcpos = [this.srcpos[0] + 1, 1];
-		} else {
-			this.srcpos = [this.srcpos[0], this.srcpos[1] + 1];
-		}
-	}
+	var ch = this.ch;
 	this.ch = this.inp.charAt(this.pos);
 	this.pos += 1;
+	if (ch != '') {
+		if (ch == '\n') {
+			this.srcpos = [this.srcpos[0] + 1, 1, this.pos];
+		} else {
+			this.srcpos = [this.srcpos[0], this.srcpos[1] + 1, this.pos];
+		}
+	}
 	return this.ch
 };
 Lexer.prototype.append_token = function(tok) {

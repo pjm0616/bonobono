@@ -20,12 +20,12 @@
 		(sleep 2000)))))
 	(start (infloop (lambda ()
 		(loop (lambda (n) (begin
-			(if (eq n 4) (speak "보노보노") 0)
+			(if (eq n 4) (speak "때릴꼬얌?" 110 200) 0)
 			(setv "face_sweat_len" n)
 			(sleep 1000)))
 			4))))
 	(start (infloop (lambda () (begin
-		(let (res (suspend choice "speed" "fast" "slow" ))
+		(let (res (suspend wait_event "speed"))
 			(if (eq res "fast")
 				(setv "body_arm_speed" 2)
 				(setv "body_arm_speed" 0))
