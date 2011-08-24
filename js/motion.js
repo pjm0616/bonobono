@@ -129,6 +129,5 @@ var motion = {
 		body_walk_dir = 0;
 	}
 
-	susepend: function()
 }
 
