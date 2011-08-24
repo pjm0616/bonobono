@@ -3,6 +3,8 @@
 <title>Line</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
 
+		<link rel="stylesheet" type="text/css" href="css/cupertino/jquery-ui-1.8.16.custom.css" />
+
 <script type="application/javascript" src="js/jquery-1.6.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
 		<script type="text/javascript" src="js/jquery-timer-1.0.0.js"></script>
@@ -22,31 +24,61 @@
 <script type="text/javascript">
 
 function showSelectionDialog(content, callback, data) {
-	$('#userInputDialog').dialog({
-		autoOpen: true,
-		show: "blind",
-		hide: "blind",
-		resizable: false,
-		draggable: false,
-		width: 400,
-		open: (function() {
-			$('#userInputDialog')[0].innerHTML = '<p>' + content + '</p>';
-			console.log(data);
-			for (var i in data) {
-				var button = document.createElement('button');
-				button.innerText = data[i];
-				button.id = "button" + data[i];
-				$('#userInputDialog')[0].appendChild(button);
-				$('#button' + data[i]).button().click(function() {
+	if (data == "none") {
+		$('#userInputDialog').dialog({
+			autoOpen: true,
+			show: "blind",
+			hide: "blind",
+			resizable: false,
+			draggable: false,
+			width: 400,
+			open: function() {
+				$('#userInputDialog')[0].innerHTML = '<p>' + content + '</p>' +
+																						 '<input type="text" id="userInput" class="text ui-widget-content ui-corner-all" size=50 />';
+				},
+			buttons: {
+				"»Æ¿Œ": function() {
+						callback($('#userInput')[0].value);
+						$('#userInputDialog').dialog('close');
+						$('#userInputDialog').dialog('destroy');
+						while (typeof $('#userInputDialog')[0].children[0] != "undefined") {
+							$('#userInputDialog')[0].removeChild($('#userInputDialog')[0].children[0]);
+						}
+				}}
+		});
+	}
+	else {
+		$('#userInputDialog').dialog({
+			autoOpen: true,
+			show: "blind",
+			hide: "blind",
+			resizable: false,
+			draggable: false,
+			width: 400,
+			open: (function() {
+				$('#userInputDialog')[0].innerHTML = '<p>' + content + '</p>';
+				for (var i in data) {
+					var button = document.createElement('button');
+					var str = new String(data[i]);
+					button.innerText = data[i];
+					button.id = "button" + i;
+					$('#userInputDialog')[0].appendChild(button);
+					$('#button' + i).button().click(function() {
+								
+								$('#userInputDialog').dialog('close');
+								$('#userInputDialog').dialog('destroy');
+								var text = $(this)[0].innerText;
+								while (typeof $('#userInputDialog')[0].children[0] != "undefined") {
+									$('#userInputDialog')[0].removeChild($('#userInputDialog')[0].children[0]);
+								}
+								callback(text);
 
-							$('#userInputDialog').dialog('close');
-							$('#userInputDialog').dialog('destroy');
-							callback(data[i]);
-						});
-				$('#button' + data[i]).css('width', 375);
-			}
-		})
-	});
+							});
+					$('#button' + i).css('width', 375);
+				}
+			})
+		});
+	}
 }
 
 	var g_interp = new Interp();
@@ -73,10 +105,9 @@ function showSelectionDialog(content, callback, data) {
 
 	
 	g_interp.global_env['choice'] = native_func(function(interp, args, state) {
-		alert("aa");
-		var callback = (function(name, args, state) {
-			return function(selected) { state.do_return(selected); }
-		})(args[0], args.slice(1), state);
+		var callback = (function(state) {
+			return function(selected) { /*alert(selected);*/state.do_return(selected);}
+		})(state);
 		showSelectionDialog(args[0],callback,args.slice(1));
 	});
 
