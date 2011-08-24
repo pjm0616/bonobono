@@ -4,9 +4,8 @@
 	(start (infloop (lambda () (begin
 		(setv "body_walk_dir" 0)
 		(sleep 5000)
-		(let (dir (getglobal "next-body-walk-dir")) (begin
-			(setv "body_walk_dir" dir)
-			(setglobal "next-body-walk-dir" (if (eq dir 1) 2 1))))
+		(setv "body_walk_dir" next-body-walk-dir)
+		(setglobal "next-body-walk-dir" (if (eq next-body-walk-dir 1) 2 1))
 		(sleep 1000)
 		))))
 	(start (infloop (lambda () (begin
