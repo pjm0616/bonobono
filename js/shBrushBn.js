@@ -33,6 +33,7 @@
 										'getglobal setglobal ' +
 										'start ' +
 										'list-new list-get list-set list-len list-foreach ' +
+										'dict-set dict-foreach ' +
 										'face_left face_right face_red face_eye face_mouth face_sweat face_shake ' + 
 										'body_left body_right body_shell body_shake body_arm_shake body_walk';
 

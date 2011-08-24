@@ -57,7 +57,8 @@ $(function() {
 		"eq", "lt", "gt", "add", "mul", "sub", "mod", "div", "pow", "print",
 		"sleep", "suspend", "getglobal", "setglobal", "ne", "ge", "le", "not",
 		"infloop", "forloop-step", "forloop", "floor", "random", "list-new", "list-get",
-		"list-set", "list-len", "list-foreach"];
+		"list-set", "list-len", "list-foreach",
+		"dict-set", "dict-foreach"];
 	$('#input').autocomplete({
 		delay: 100,
 		open: function(event, ui) {
