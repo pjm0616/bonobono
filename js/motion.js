@@ -79,11 +79,13 @@ var motion = {
 	body_left: function()
 	{
 		set_log("body left : ( [ )");
+		body_walk_dir = 1;
 	},
 
 	body_right: function()
 	{
 		set_log("body right : ( ] )");
+		body_walk_dir = 2;
 	},
 
 	body_shell: function()
@@ -124,6 +126,7 @@ var motion = {
 	body_walk: function(speed,sec)
 	{
 		set_log("body walk : speed = " + speed + " | sec = " + sec);
+		body_walk_dir = 0;
 	}
 }
 
