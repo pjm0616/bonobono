@@ -207,6 +207,21 @@ Interp.prototype.init = function() {
 	this.global_env['not'] = native_func(function(interp, args) { return !args[0]; });
 	this.global_env['and'] = native_func(function(interp, args) { return args[0] && args[1]; });
 	this.global_env['or'] = native_func(function(interp, args) { return args[0] || args[1]; });
+
+	this.global_env['loop'] = this.eval(parse(
+		'(lambda (func n)'+
+			'(letrec (loop (lambda (n)'+
+				'(if (gt n 0)'+
+					'(begin (func n) (loop (sub n 1)))'+
+					'0)))'+
+				'(loop n)))'
+		));
+	this.global_env['infloop'] = this.eval(parse(
+		'(lambda (func)'+
+			'(letrec (loop (lambda ()'+
+				'(begin (func) (loop))))'+
+				'(loop)))'
+		));
 }
 Interp.prototype.error = function(msg) {
 	print(msg);

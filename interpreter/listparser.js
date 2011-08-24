@@ -15,7 +15,7 @@ function ListParser(tokens) {
 }
 
 ListParser.prototype.error = function(msg) {
-	var pos = this.tokens[(this.pos > 0) ? (this.pos - 1) : (0)];
+	var pos = this.tokens[(this.pos > 0) ? (this.pos - 1) : 0];
 	var msg = 'parsing error at (' + pos[0] + ', ' + pos[1] + '): ' + msg;
 	throw msg;
 }

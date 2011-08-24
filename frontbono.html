@@ -34,6 +34,8 @@
 	g_interp.global_env['wait_for_button'] = native_func(function(interp, args, state) {
 		g_state = state;
 	});
+	g_interp.global_env['test'] = g_interp.eval(parse('(lambda () (alert "test"))'))
+
 </script>
 
 </head>
