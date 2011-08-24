@@ -71,8 +71,12 @@ function printlang(t) {
 var parse_lang;
 (function() {
 	function error(t, msg) {
-		var pos = '(' + t.pos[0] + ', ' + t.pos[1] + ')';
-		var msg = 'parsing error at ' + pos + ': ' + msg;
+		if (t) {
+			var pos = '(' + t.pos[0] + ', ' + t.pos[1] + ')';
+		} else {
+			var pos = '(unknown)';
+		}
+		var msg = 'parsing error near ' + pos + ': ' + msg;
 		throw msg;
 	}
 
@@ -81,12 +85,12 @@ var parse_lang;
 			error(t, 'expected ' + exp + ', got ' + t.type);
 		}
 	}
-	function check(expr, expected, msg) {
+	function check(t, expr, expected, msg) {
 		if (expr != expected) {
 			if(!msg) {
 				msg = 'expected ' + expected + ', got ' + expr;
 			}
-			error(null, msg);
+			error(t, msg);
 		}
 	}
 
@@ -106,8 +110,8 @@ var parse_lang;
 	function parse_lambda(t) {
 		//check_type(t, 'list');
 		var list = t.list;
-		check(list.length, 3, 'list.length is not 3')
-		//check_type(list[0], 'symbol'); check(list[0].symbol, 'lambda');
+		check(t, list.length, 3, 'list.length is not 3')
+		//check_type(list[0], 'symbol'); check(list[0], list[0].symbol, 'lambda');
 
 		// parse variable list
 		check_type(list[1], 'list');
@@ -125,15 +129,15 @@ var parse_lang;
 	function parse_let(t) {
 		//check_type(t, 'list');
 		var list = t.list;
-		check(list.length, 3, 'list.length is not 3');
-		//check_type(list[0], 'symbol'); check(list[0].symbol, 'let');
+		check(t, list.length, 3, 'list.length is not 3');
+		//check_type(list[0], 'symbol'); check(list[0], list[0].symbol, 'let');
 
 		// parse (var expr) list
 		var varname, expr;
 		check_type(list[1], 'list');
 		{
 			var list2 = list[1].list;
-			check(list2.length, 2, 'list.length is not 2');
+			check(list[1], list2.length, 2, 'list.length is not 2');
 			check_type(list2[0], 'symbol');
 
 			varname = list2[0].symbol;
@@ -152,7 +156,7 @@ var parse_lang;
 
 	function parse_if(t) {
 		var list = t.list;
-		check(list.length, 4, 'list.length is not 4');
+		check(t, list.length, 4, 'list.length is not 4');
 
 		var cond = parse_lang(list[1]);
 		var trueexpr = parse_lang(list[2]);
@@ -162,7 +166,7 @@ var parse_lang;
 
 	function parse_start(t) {
 		var list = t.list;
-		check(list.length, 2, 'list.length is not 2');
+		check(t, list.length, 2, 'list.length is not 2');
 
 		var body = parse_lang(list[1]);
 		return {type: 'Start', body: body};

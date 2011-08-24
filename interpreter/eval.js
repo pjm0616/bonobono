@@ -190,6 +190,15 @@ Interp.prototype.init = function() {
 		state.cont = Interp.EndCont;
 		return null;
 	});
+	this.global_env['getglobal'] = native_func(function(interp, args, state) {
+		var name = args[0];
+		return interp.global_env[name];
+	});
+	this.global_env['setglobal'] = native_func(function(interp, args, state) {
+		var name = args[0];
+		var value = args[1];
+		return interp.global_env[name] = value;
+	});
 
 	this.global_env['eq'] = native_func(function(interp, args) { return args[0] == args[1]; });
 	this.global_env['ne'] = native_func(function(interp, args) { return args[0] != args[1]; });
@@ -208,7 +217,7 @@ Interp.prototype.init = function() {
 	this.global_env['and'] = native_func(function(interp, args) { return args[0] && args[1]; });
 	this.global_env['or'] = native_func(function(interp, args) { return args[0] || args[1]; });
 
-	this.global_env['loop'] = this.eval(parse(
+	this.global_env['loop'] = this.eval(parser.parse(
 		'(lambda (func n)'+
 			'(letrec (loop (lambda (n)'+
 				'(if (gt n 0)'+
@@ -216,7 +225,7 @@ Interp.prototype.init = function() {
 					'0)))'+
 				'(loop n)))'
 		));
-	this.global_env['infloop'] = this.eval(parse(
+	this.global_env['infloop'] = this.eval(parser.parse(
 		'(lambda (func)'+
 			'(letrec (loop (lambda ()'+
 				'(begin (func) (loop))))'+
@@ -478,6 +487,11 @@ inp = '(begin'+
 inp = '(begin'+
 			'(print "a") (sleep 1000) (print "b") (sleep 1000)'+
 			'(print "c") (sleep 1000) (print "d") (sleep 1000)'+
+		')';
+inp = '(begin'+
+		'(setglobal "loop2" (getglobal "loop"))'+
+		'(setglobal "loop" 0)'+
+		'(loop2 (lambda () (print "test")) 4)'+
 		')';
 
 interp.global_env['delayed_continue'] = native_func(function(interp, args, state) {
