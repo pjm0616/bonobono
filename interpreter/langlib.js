@@ -55,6 +55,16 @@ function loadlibs(interp) {
 		add_native_func('floor', function(interp, args) {
 			return Math.floor(args[0]);
 		});
+		add_native_func('random', function(interp, args) {
+			var n = Math.random();
+			if (args.length == 2) {
+				var min = args[0], max = args[1];
+				var d = max - min;
+				return n * d + min;
+			} else {
+				return n;
+			}
+		});
 	};
 
 	var load_list = function() {
