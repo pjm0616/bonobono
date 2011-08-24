@@ -74,7 +74,7 @@
 		</script>
 	</div>
 	<textarea id="code" style="float:right; width: 40em; height: 50em;"></textarea>
-	<textarea id="logbono" style="float:bottom;">bonobono</textarea>
+	<textarea id="logbono" style="float:bottom; height: 40em;"></textarea>
 	<input type="button" value="보기" id="btn" />
 	<input type="button" id="faster" value="빠르게" />
 	<input type="button" id="slower" value="느리게" />
@@ -83,8 +83,17 @@
 		function run() {
 			var inp = $('#code').val();
 			var t = parse(inp);
-			g_interp.eval(t);
+			var res = g_interp.eval(t);
+			//alert('eval finished: ' + res);
 		}
+		function logmsg(msg) {
+			$('#logbono').val($('#logbono').val() + msg + '\n');
+		}
+		g_interp.global_env['logmsg'] = native_func(function(interp, args) {
+			logmsg(args[0]);
+		});
+
+
 		$('#btn').click(run);
 		$('#code').keypress(function(e) {
 			if (e.which == 13) {
@@ -94,11 +103,11 @@
 
 		$('#faster').click(function() {
 			g_state.set_return_value('fast');
-			g_interp.continue_eval();
+			g_interp.continue_eval('ev');
 		});
 		$('#slower').click(function() {
 			g_state.set_return_value('slow');
-			g_interp.continue_eval();
+			g_interp.continue_eval('ev');
 		});
 
 	</script>

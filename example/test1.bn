@@ -14,7 +14,7 @@
 				(sleep 2000)))
 			1000))
 		(start (loop (lambda () (begin
-				(setv "body_shake_speed" 1)
+				(setv "body_shake_speed" 2)
 				(sleep 2000)
 				(setv "body_shake_speed" 0)
 				(sleep 2000)))
@@ -24,5 +24,20 @@
 					(sleep 1000))
 				) 4))
 			1000))
+		(start (loop (lambda () (begin
+				(let (res (suspend wait_for_button))
+					(if (eq res "fast")
+						(alert res)
+						(alert "asdf"))
+				)))
+			1000))
 	))
+
+######################
+
+(begin
+(start (letrec (loop (lambda () (begin (logmsg (suspend wait_for_button)) (loop)))) (loop)))
+(start (letrec (loop (lambda () (begin  (setv "face_red" 1) (sleep 1000) (setv "face_red" 0) (sleep 1000)  (loop)))) (loop)))
+)
+
 

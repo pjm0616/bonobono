@@ -2,6 +2,7 @@
 if (typeof window === 'undefined') {
 	var sys = require('sys');
 	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
+	var logmsg = print;
 	var parser = require('./parser.js')
 } else {
 	var exports = window;
@@ -67,26 +68,28 @@ Scheduler.prototype.runnable = function(s) {
 	if (s.opts) {
 		resume_at = s.opts.resume_at;
 	}
-	return resume_at === 0 || (resume_at > 0 && resume_at <= this.time());
+	return !s.suspended && resume_at === 0 || (resume_at > 0 && resume_at <= this.time());
 }
 Scheduler.prototype.pop = function() {
 	var queue = [];
 	var min_resume_s = null;
+	var suspended_s = null;
 	var endcont_res = null;
 	while (true) {
 		var s = this.pop_queue();
 		if (!s) {
 			if (queue.length > 0) {
-				// all continuations are sleeping
-				if (!min_resume_s) { throw 'must not happen'; }
 				this.queue = queue;
-
-				var minopts = min_resume_s.opts;
-				var ret = {do_suspend: true,
-						resume_at: minopts.resume_at,
-						resume_func: minopts.resume_func,
-						s: min_resume_s};
-				return ret;
+				// all continuations are sleeping
+				if (min_resume_s) {
+//					print('Pausing interpreter')
+					return {resume_at: min_resume_s.opts.resume_at, s: min_resume_s};
+				} else if (suspended_s) {
+//					print('Halting interpreter')
+					return {cont: Interp.HaltCont, cont_res: null};
+				} else {
+					throw 'cannot happen; asoi3yhc';
+				}
 			} else {
 				// the queue is empty
 				// HACK: return the last EndCont's result
@@ -105,15 +108,17 @@ Scheduler.prototype.pop = function() {
 			}
 			return s;
 		} else {
-			if (s.opts) {
+			if (s.opts && typeof (s.opts.resume_at) == 'number') {
 				var resume_time = s.opts.resume_at;
-				if (typeof resume_time == 'number') {
-					if (min_resume_s === null) {
-						min_resume_s = s;
-					} else if (resume_time > 0 && resume_time < min_resume_s.opts.resume_at) {
-						min_resume_s = s;
-					}
+				if (min_resume_s === null) {
+					min_resume_s = s;
+				} else if (resume_time > 0 && resume_time < min_resume_s.opts.resume_at) {
+					min_resume_s = s;
 				}
+			} else if (s.suspended) {
+				suspended_s = s;
+			} else {
+				throw 'cannot happen; a03casf';
 			}
 			queue[queue.length] = s;
 		}
@@ -136,6 +141,8 @@ function Interp() {
 	this.store = {};
 	this.global_env = {};
 	this.sched = new Scheduler();
+	this.running = false;
+	this.scheduled_eval = null;
 	this.init();
 }
 Interp.EndCont = {type: 'Continuation', name: 'EndCont',
@@ -168,14 +175,15 @@ Interp.prototype.init = function() {
 			throw 'first argument must be NativeFunc';
 		}
 
-		var s = {cont: state.cont, cont_res: null};
+		var s = {cont: state.cont, cont_res: null, suspended: true};
 		func.apply(interp, args.slice(1), {
 			set_return_value: function(value) {
+				s.suspended = false;
 				s.cont_res = value;
 			}
 		});
 		interp.sched.add_schedule(s);
-		state.cont = Interp.HaltCont;
+		state.cont = Interp.EndCont;
 		return null;
 	});
 
@@ -329,12 +337,24 @@ Interp.prototype.apply_func = function(func, args, k, env) {
 		this.error('invalid function type');
 	}
 };
-Interp.prototype.continue_eval = function() {
+Interp.prototype.continue_eval = function(debug) {
+	if (this.running) {
+		logmsg('already running')
+		return null;
+	} else if (this.scheduled_eval) {
+		logmsg('cancelling scheduled eval ' + this.scheduled_eval)
+		clearTimeout(this.scheduled_eval);
+		this.scheduled_eval = null;
+	}
+	this.running = true;
+	logmsg('eval start: ' + debug)
 	var s = this.sched.pop();
 	var res = this.apply_k_real(s);
 	while (typeof res == 'function') {
 		res = res();
 	}
+	this.running = false;
+	logmsg('eval end: ' + debug)
 	return res;
 }
 Interp.prototype.make_interp_continuation = function() {
@@ -344,6 +364,7 @@ Interp.prototype.apply_k = function(k, v) {
 	if (k.name == 'HaltCont') {
 		// don't reschedule continuations and halt here
 		var s = {cont: k, cont_res: v};
+		logmsg('halting interpreter')
 	} else {
 		var s = this.sched.getnext(k, v);
 	}
@@ -352,11 +373,15 @@ Interp.prototype.apply_k = function(k, v) {
 Interp.prototype.apply_k_real = function(s) {
 	if (s.cont) {
 		return s.cont.apply(s.cont_res);
-	} else if (s.do_suspend) {
-		var interp = this;
+	} else if (s.resume_at) {
 //		print('delay: ' +(s.resume_at - this.sched.time()));
-		interp.sched.add(s.s.cont, s.s.cont_res)
-		setTimeout(this.make_interp_continuation(), s.resume_at - this.sched.time());
+		logmsg('delay: '+(s.resume_at - this.sched.time()))
+
+		var interp = this;
+		this.scheduled_eval = setTimeout(function() {
+				interp.scheduled_eval = null;
+				interp.continue_eval('timeout');
+			}, s.resume_at - this.sched.time());
 		return null;
 	} else {
 		// cannot happen
@@ -432,6 +457,11 @@ inp = '(begin'+
 			'(print (concat "ret: \'" (suspend delayed_continue 33) "\' end"))'+
 			'(print "B")'+
 		')';
+inp = '(begin'+
+			'(print "a") (sleep 1000) (print "b") (sleep 1000)'+
+			'(print "c") (sleep 1000) (print "d") (sleep 1000)'+
+		')';
+
 interp.global_env['delayed_continue'] = native_func(function(interp, args, state) {
 	setTimeout(function() {
 		state.set_return_value('arg0 is: ' + args[0] + ' and time is: ' + interp.sched.time());
