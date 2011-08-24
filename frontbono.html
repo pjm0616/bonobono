@@ -15,6 +15,7 @@
 
 <script type="text/javascript">
 	var g_interp = new Interp();
+	var g_state;
 	register_funcs(g_interp, motion);
 
 	var global = this;
@@ -29,6 +30,10 @@
 		}
 	};
 	register_funcs(g_interp, funcs);
+
+	g_interp.global_env['wait_for_button'] = native_func(function(interp, args, state) {
+		g_state = state;
+	});
 </script>
 
 </head>
@@ -70,7 +75,9 @@
 	</div>
 	<textarea id="code" style="float:right; width: 40em; height: 50em;"></textarea>
 	<textarea id="logbono" style="float:bottom;">bonobono</textarea>
-	<input type="button" value="보기" id="btn" /> 
+	<input type="button" value="보기" id="btn" />
+	<input type="button" id="faster" value="빠르게" />
+	<input type="button" id="slower" value="느리게" />
 
 	<script type="text/javascript">
 		function run() {
@@ -84,6 +91,16 @@
 				run();
 			}
 		});
+
+		$('#faster').click(function() {
+			g_state.set_return_value('fast');
+			g_interp.continue_eval();
+		});
+		$('#slower').click(function() {
+			g_state.set_return_value('slow');
+			g_interp.continue_eval();
+		});
+
 	</script>
 
 </body>
