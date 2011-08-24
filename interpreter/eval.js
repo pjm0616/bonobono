@@ -4,10 +4,13 @@ if (typeof window === 'undefined') {
 	var print = function(s) { return sys.print(JSON.stringify(s) + '\n') };
 	var logmsg = print;
 	var parser = require('./parser.js')
+	var parse = parser.parse;
+	var printlang = parser.printlang;
+	var langlib = require('./langlib.js')
+	var loadlibs = langlib.loadlibs;
 } else {
 	var exports = window;
 	var print = function(s) { alert(s); };
-	var parser = {parse: parse, printlang: printlang};
 }
 
 function Env(parent) {
@@ -144,6 +147,9 @@ function Interp() {
 	this.running = false;
 	this.scheduled_eval = null;
 	this.init();
+	if (loadlibs) {
+		loadlibs(this);
+	}
 }
 Interp.EndCont = {type: 'Continuation', name: 'EndCont',
 	apply: function(result) {
@@ -216,26 +222,22 @@ Interp.prototype.init = function() {
 	this.global_env['not'] = native_func(function(interp, args) { return !args[0]; });
 	this.global_env['and'] = native_func(function(interp, args) { return args[0] && args[1]; });
 	this.global_env['or'] = native_func(function(interp, args) { return args[0] || args[1]; });
-
-	this.global_env['loop'] = this.eval(parser.parse(
-		'(lambda (func n)'+
-			'(letrec (loop (lambda (n)'+
-				'(if (gt n 0)'+
-					'(begin (func n) (loop (sub n 1)))'+
-					'0)))'+
-				'(loop n)))'
-		));
-	this.global_env['infloop'] = this.eval(parser.parse(
-		'(lambda (func)'+
-			'(letrec (loop (lambda ()'+
-				'(begin (func) (loop))))'+
-				'(loop)))'
-		));
 }
 Interp.prototype.error = function(msg) {
 	print(msg);
 	throw msg;
 }
+
+Interp.prototype.set_global = function(name, value) {
+	this.global_env[name] = value;
+}
+Interp.prototype.get_global = function(name) {
+	return this.global_env[name];
+}
+Interp.prototype.make_native_func = function(func) {
+	return native_func(func);
+}
+
 Interp.prototype.check_type = function(t, type) {
 	if (t.type != type) {
 		this.error('Type not matched: expected ' + type + ', got ' + t.type);
@@ -244,7 +246,7 @@ Interp.prototype.check_type = function(t, type) {
 Interp.prototype.getenv = function(e, name) {
 	var res = e.get(name);
 	if (res == null) {
-		res = this.global_env[name];
+		res = this.get_global(name);
 	}
 	if (res == null) {
 		this.error('getenv: no such name: ' + name);
@@ -433,6 +435,8 @@ Interp.prototype.eval = function(t) {
 	return this.continue_eval('eval');
 }
 
+exports.Interp = Interp;
+
 
 /*
 var interp = new Interp();
@@ -493,6 +497,21 @@ inp = '(begin'+
 		'(setglobal "loop" 0)'+
 		'(loop2 (lambda () (print "test")) 4)'+
 		')';
+inp = '(forloop 0 10 (lambda (n)'+
+			'(print n)'+
+		'))';
+inp = '(begin'+
+			'(setglobal "t" (list-new "a" "b2" 3))'+
+			'(print (concat "length: " (list-len t)))'+
+			'(print (concat "first: " (list-get t 0)))'+
+			'(print "---")'+
+			'(loop (lambda(n)'+
+				'(print (concat n ": " (list-get t (sub n 1))))'+
+				') (list-len t))'+
+			'(print "-----")'+
+			'(list-foreach t print)'+
+			'(print "=====")'+
+		')';
 
 interp.global_env['delayed_continue'] = native_func(function(interp, args, state) {
 	setTimeout(function() {
@@ -502,19 +521,14 @@ interp.global_env['delayed_continue'] = native_func(function(interp, args, state
 });
 
 try {
-	t = parser.parse(inp);
-} catch (e) {
-	print(e)
-	return;
-}
-parser.printlang(t)
+	var t = parse(inp);
+	//printlang(t)
+} catch (e) { print('parse failed: ' + e); }
 
 try {
 	r = interp.eval(t);
 	print('eval result: ' + JSON.stringify(r))
-//*
-} catch (e) {
-	print(e)
-}
+} catch (e) { print('eval failed: ' + e); }
+
 //*/
 
