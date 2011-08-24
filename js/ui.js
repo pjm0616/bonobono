@@ -32,7 +32,7 @@ $(function() {
 		reHilight();
 	});
 	$('#runButton').button().click(function() {
-		g_interp.eval(parse($('#orgCode')[0].value));
+		g_interp.eval(parse($('#orgCode')[0].innerHTML));
 	});
 	$("#exampleComboBox").combobox({
 		selected: function(event, ui) {
@@ -101,12 +101,13 @@ function showSelectionDialog(content, callback, data) {
 				},
 			buttons: {
 				"확인": function() {
-						callback($('#userInput')[0].value);
+						var ret = $('#userInput')[0].value;
 						$('#userInputDialog').dialog('close');
 						$('#userInputDialog').dialog('destroy');
 						while (typeof $('#userInputDialog')[0].children[0] != "undefined") {
 							$('#userInputDialog')[0].removeChild($('#userInputDialog')[0].children[0]);
 						}
+						callback(ret);
 				}}
 		});
 	}
@@ -127,12 +128,13 @@ function showSelectionDialog(content, callback, data) {
 					button.id = "button" + i;
 					$('#userInputDialog')[0].appendChild(button);
 					$('#button' + i).button().click(function() {
-								callback($(this)[0].innerText);
+								var ret = $(this)[0].innerText; 
 								$('#userInputDialog').dialog('close');
 								$('#userInputDialog').dialog('destroy');
 								while (typeof $('#userInputDialog')[0].children[0] != "undefined") {
 									$('#userInputDialog')[0].removeChild($('#userInputDialog')[0].children[0]);
 								}
+								callback(ret);
 							});
 					$('#button' + i).css('width', 375);
 				}
