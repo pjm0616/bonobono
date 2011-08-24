@@ -10,6 +10,7 @@ var face_eye_state, face_eye_sec;
 // body function global
 var body_shake_speed, body_shake_A;
 var body_arm_speed, body_arm_A;
+var body_walk_dir, body_walk_speed;
 
 
 var time, time_interval;
@@ -25,6 +26,10 @@ var body_arm_left_axis = new Array();
 var body_arm_right_axis = new Array();
 var body_shake_degree, body_arm_degree;
 
+var body_side_leftleg_axis = new Array();
+var body_side_rightleg_axis = new Array();
+var body_side_tail_axis = new Array();
+
 
 
 function iniCanvas(){
@@ -32,10 +37,11 @@ function iniCanvas(){
 	ctx=canvas.getContext("2d");
 	ctx.font = "20px coding";
 	ctx.lineWidth = 3;
-	ctx.clearRect(0,0,800,680);
+	ctx.clearRect(0,0,1000,1000);
 }
 
 function init_data(){
+
 	face_shake_speed = 0;
 	face_shake_A = 0;
 	face_sweat_len = 0;
@@ -48,6 +54,8 @@ function init_data(){
 	body_shake_A = 0;
 	body_arm_speed = 0;
 	body_arm_A = 0;
+	body_walk_dir = 0;
+	body_walk_speed = 0;
 		
 	time = 0;
 	time_interval = 10;
@@ -65,6 +73,12 @@ function init_data(){
 	body_arm_right_axis = resize_point(body_arm_right_axis);
 	body_shake_degree = 0;
 	body_arm_degree = 0;
+	
+	
+	body_side_leftleg_axis = [ 195, 507 ];
+	body_side_rightleg_axis = [ 240, 507 ];
+	body_side_tail_axis = [ 305, 470 ];
+	
 }
 
 function resize_point(point){
@@ -466,20 +480,279 @@ function draw_mouse(){
 	}
 }
 
+function side_fix(point){
+	for( var i = 0 ; i < point.length ; i+=2 ) {
+		point[i] = 600 - point[i];
+	}
+	return point;
+}
+
+function side_move_round(point){
+	var roundspeed = 3, radi = 25;
+	if( body_walk_dir == 1 ) roundspeed *= -1;
+	var x_diff, y_diff;
+	x_diff = radi * Math.cos(time/1000*pi*roundspeed);
+	y_diff = radi * Math.sin(time/1000*pi*roundspeed);
+	for( var i = 0 ; i < point.length ; i+=2 ) {
+		point[i] += x_diff;
+		point[i+1] += y_diff;
+	}
+	return point;
+}
+
+function draw_side_body(){
+	var point = new Array();
+
+	point = [351.4561, 185.55560000000003, 359.4551, 47.57280000000003, 212.4734, 79.56880000000001, 159.4801, 84.56820000000005, 97.4878, 182.5559, 46.4942, 256.5467, 176.4779, 284.5432, 81.4898, 409.5276, 177.4778, 527.5128, 229.4713, 583.5058, 298.4627, 532.5122, 393.4508, 409.5276, 295.4631, 280.5437, 333.4583, 270.5449, 351.4561, 185.55560000000003];
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+	
+	ctx.fillStyle="rgb(143,208,240)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+	ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+	ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+	ctx.quadraticCurveTo(point[22], point[23], point[24], point[25]);
+	ctx.quadraticCurveTo(point[26], point[27], point[28], point[29]);
+	ctx.fill();
+	ctx.stroke();
+	
+	point = [88.4889, 195.5543, 58.4927, 244.5482, 106.4867, 251.5473, 123.4846, 221.55110000000002, 88.4889, 195.5543];
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+	
+	ctx.fillStyle="rgb(215,191,205)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.fill();
+	ctx.stroke();
+	
+	
+	point =  [86.9891, 197.0541, 145.9817, 204.05329999999998, 124.9844, 251.04739999999998, 85.9892, 266.0455, 86.9891, 197.0541] ;
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+	ctx.fillStyle="rgb(215,191,205)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.fill();
+	ctx.stroke();
+
+	point =  [104.9869, 216.55169999999998, 134.9831, 200.5537, 110.9861, 224.5507, 145.9817, 222.5509, 109.9862, 234.5494, 146.9816, 240.5487] ;
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+	
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.lineTo(point[2], point[3]);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(point[4], point[5]);
+	ctx.lineTo(point[6], point[7]);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(point[8], point[9]);
+	ctx.lineTo(point[10], point[11]);
+	ctx.stroke();
+
+	
+	point = [ 89.9887, 200 ];
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+	ctx.fillStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.arc(point[0], point[1], 20, 0, pi*2, 1);
+	ctx.fill();
+	
+
+}
+
+
+function draw_side_eye(){
+	if( face_eye_state == 0 ) {
+		var point = [ 275 , 137 ];
+		if( body_walk_dir == 2 ) point = side_fix(point);
+		point = side_move_round(point);
+		ctx.fillStyle="rgb(0,0,0)";
+		ctx.beginPath();
+		ctx.arc(point[0], point[1], 5, 0, Math.PI*2, 1);
+		ctx.closePath();
+		ctx.fill();
+	}
+	else if( face_eye_state == 1 ) {
+		var point =  [297.9627, 122.06349999999998, 275.9655, 137.0616, 299.9625, 136.0618, 276.9654, 138.06150000000002, 293.9632, 148.06029999999998] ;
+		if( body_walk_dir == 2 ) point = side_fix(point);
+		point = side_move_round(point);
+
+		ctx.beginPath();
+		ctx.moveTo(point[0], point[1]);
+		ctx.lineTo(point[2], point[3]);
+		ctx.lineTo(point[4], point[5]);
+		ctx.moveTo(point[6], point[7]);
+		ctx.lineTo(point[8], point[9]);
+		ctx.stroke();
+
+	}
+	else if( face_eye_state == 2 ) {
+		var point =  [275.9655, 127.06290000000001, 290.9636, 160.05880000000002, 296.9629, 124.06330000000003] ;
+		if( body_walk_dir == 2 ) point = side_fix(point);
+		point = side_move_round(point);
+
+		ctx.beginPath();
+		ctx.moveTo(point[0], point[1]);
+		ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+		ctx.stroke();
+
+	}
+}
+
+
+
+function draw_side_leftarm(){
+	var point =  [183.977, 280.5437, 123.9845, 334.5369, 99.9875, 332.5372, 86.9891, 340.5362, 96.9879, 343.5358, 86.9891, 351.5348, 96.9879, 352.5347, 86.9891, 359.5338, 95.988, 361.5336, 150.9811, 366.5329, 189.9762, 342.5359] ;
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+
+	ctx.fillStyle="rgb(143,208,240)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+	ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+	ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+	ctx.fill();
+	ctx.stroke();
+	
+}
+
+function draw_side_rightarm(){
+	var point =  [182.9771, 310.04, 143.982, 342.036, 96.9879, 337.0366, 81.9897, 343.0359, 94.9881, 349.0351, 82.9896, 355.0344, 93.9882, 360.0338, 81.9897, 366.033, 96.9879, 370.0325, 153.9807, 389.0301, 200.9749, 370.0325] ;
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+
+	ctx.fillStyle="rgb(143,208,240)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+	ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+	ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+	ctx.fill();
+	ctx.stroke();
+}
+
+function draw_side_shell(){
+	var point =  [92.4884, 287.0429, 170.4787, 338.0365, 84.4894, 387.0304, 59.4926, 390.03, 66.4917, 338.0365, 68.4914, 279.0439, 92.4884, 287.0429] ;
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+
+	ctx.fillStyle="rgb(215,129,154)";
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+	ctx.fill();
+	ctx.stroke();
+}
+
+function draw_side_tail(){
+	var tail_degree = Math.sin(time/1000*pi*2) * pi * 15 / 360 ;
+	var point =  [310.4612, 442.52340000000004, 376.4529, 442.52340000000004, 385.4518, 426.5254, 416.4479, 431.5248, 391.4511, 450.5224, 357.4553, 478.51890000000003, 310.4612, 468.5202] ;
+	point = rotate_point(body_side_tail_axis,point,tail_degree);
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+	
+	ctx.fillStyle="rgb(143,208,240)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+	ctx.fill();
+	ctx.stroke();
+}
+
+function draw_side_leftleg(){
+	var leftleg_degree = Math.sin(time/1000*pi*4) * pi * 30 / 360 ;
+	var point =  [170.9792, 513.5146, 187.9771, 540.5112, 201.9754, 546.5104, 174.9787, 550.5099, 171.9791, 570.5074, 179.9781, 585.5056, 219.9731, 576.5067, 276.966, 575.5068, 237.9709, 549.5101, 249.9694, 539.5113, 259.9681, 515.5143] ;
+	point = rotate_point(body_side_leftleg_axis,point,leftleg_degree);
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+	ctx.fillStyle="rgb(143,208,240)";
+	ctx.strokeStyle="rgb(0,0,0)";
+	
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+	ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+	ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+	ctx.fill();
+	ctx.stroke();
+}
+
+function draw_side_rightleg(){
+	var rightleg_degree = Math.sin(time/1000*pi*4) * pi * -30 / 360 ;
+	var point =  [205.4743, 500.0163, 224.4719, 534.012, 243.4696, 546.0105, 201.4748, 554.0095, 203.4746, 574.007, 204.4744, 591.0049, 285.4643, 578.0065, 318.4602, 576.0068, 293.4633, 548.0103, 311.4611, 522.0135, 309.4613, 494.0158] ;
+	point = rotate_point(body_side_rightleg_axis,point,rightleg_degree);
+	if( body_walk_dir == 2 ) point = side_fix(point);
+	point = side_move_round(point);
+	ctx.fillStyle="rgb(143,208,240)";
+	ctx.strokeStyle="rgb(0,0,0)";
+
+	ctx.beginPath();
+	ctx.moveTo(point[0], point[1]);
+	ctx.quadraticCurveTo(point[2], point[3], point[4], point[5]);
+	ctx.quadraticCurveTo(point[6], point[7], point[8], point[9]);
+	ctx.quadraticCurveTo(point[10], point[11], point[12], point[13]);
+	ctx.quadraticCurveTo(point[14], point[15], point[16], point[17]);
+	ctx.quadraticCurveTo(point[18], point[19], point[20], point[21]);
+	ctx.fill();
+	ctx.stroke();
+}
+
 function draw_front(){
 	time += time_interval;
 	iniCanvas();
-	get_degree();
-	draw_body();
-	draw_head();
-	draw_eye();
-	draw_lip();
-	draw_musta();
-	draw_nose();
-	draw_rightarm();
-	draw_shell();
-	draw_leftarm();
-	draw_ddam();
-	draw_redface();
-	draw_mouse();
+	if ( body_walk_dir == 0 ) {
+		get_degree();
+		draw_body();
+		draw_head();
+		draw_eye();
+		draw_lip();
+		draw_musta();
+		draw_nose();
+		draw_rightarm();
+		draw_shell();
+		draw_leftarm();
+		draw_ddam();
+		draw_redface();
+		draw_mouse();
+	}
+	else {
+		draw_side_tail();
+		draw_side_leftarm();
+		draw_side_leftleg();
+		draw_side_body();
+		draw_side_eye();
+		draw_side_shell();
+		draw_side_rightarm();
+		draw_side_rightleg();
+	}
 }
