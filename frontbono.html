@@ -106,7 +106,7 @@ function showSelectionDialog(content, callback, data) {
 	
 	g_interp.global_env['choice'] = native_func(function(interp, args, state) {
 		var callback = (function(state) {
-			return function(selected) { /*alert(selected);*/state.do_return(selected);}
+			return function(selected) { /*alert(selected);*/state.do_return(selected);} 
 		})(state);
 		showSelectionDialog(args[0],callback,args.slice(1));
 	});
@@ -131,7 +131,7 @@ function showSelectionDialog(content, callback, data) {
 	<div id="sound" >
 		<audio id = "vocal" controls autoplay style="display: none;" name="media" src="http://sapzil.sigkill.kr/tts/tts_synth_api.php?w=tts&lang=ko&text=보노"></audio>
 
-		<audio id = "sweat" controls autoplay style="display: none;" name="media" src="data/sweat.mp3"></audio>
+		<audio id = "effect" controls autoplay style="display: none;" name="media" src="data/sweat.mp3"></audio>
 
 	</div>
 	<div id="content">
@@ -142,18 +142,18 @@ function showSelectionDialog(content, callback, data) {
 			face_shake_A = 15;
 			body_shake_speed = 0;
 			body_shake_A = 15;
-			body_arm_speed = 0.5;
-			body_arm_A = 30;
+			body_arm_speed = 0;
+			body_arm_A = 0;
 			
-			face_sweat_len = 3;
+			face_sweat_len = 0;
 			
-			face_eye_state = 1;
+			face_eye_state = 0;
 			
 			face_red = 0;
 			
 			face_mouse_speed = 0;
 			
-			body_walk_dir = 2;
+			body_walk_dir = 0;
 			
 			setInterval(draw_front,time_interval);
 			
