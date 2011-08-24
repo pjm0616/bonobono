@@ -254,7 +254,7 @@ Interp.prototype.check_type = function(t, type) {
 	}
 }
 Interp.prototype.getenv = function(e, name, origin) {
-	// arg3(origin): for error message
+	// arg3(origin): for position information in error message
 	var res = e.get(name);
 	if (res == null) {
 		res = this.get_global(name);
@@ -287,14 +287,14 @@ Interp.prototype.evalers = {
 			return self.eval_k(t.func, e, {type: 'Continuation', name: 'AppCont', _pos: t.pos,
 				apply: function(result) {
 					if (t.args.length == 0 || (result.opts && result.opts.passthru_args === true)) {
-						return function() { return self.apply_func(result, [], k, e); };
+						return function() { return self.apply_func(result, [], k, e, t); };
 					} else {
 						// evaluate arguments
 						cont = {type: 'Continuation', name: 'AppArgCont', _pos: t.pos, origargs: t.args, args: [],
 							eval_nextarg: function() {
 								var argcont = this;
 								if (this.origargs.length == 0) {
-									return function() { return self.apply_func(result, argcont.args, k, e); };
+									return function() { return self.apply_func(result, argcont.args, k, e, t); };
 								} else {
 									return function() { return self.eval_k(argcont.origargs[0], e, argcont); };
 								}
@@ -355,7 +355,8 @@ Interp.prototype.evalers = {
 		return function() { return self.eval_k(t.body, e, Interp.EndCont); };
 	},
 };
-Interp.prototype.apply_func = function(func, args, k, env) {
+Interp.prototype.apply_func = function(func, args, k, env, origin) {
+	// arg5(origin): for position information in error message
 	var self = this;
 	if (func.type == 'Func') {
 		var newenv = func.env;
@@ -375,7 +376,7 @@ Interp.prototype.apply_func = function(func, args, k, env) {
 			return self.apply_k(state.cont, res);
 		};
 	} else {
-		this.runtime_error(func, 'apply_func: invalid function type: cannot apply to ' + typeof func + '(' + func.type + ')');
+		this.runtime_error(origin, 'apply_func: invalid function type: cannot apply to ' + typeof func + '(' + func.type + ')');
 	}
 };
 Interp.prototype.continue_eval = function(called_by) {
