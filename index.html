@@ -67,7 +67,7 @@
 			</div>
 			<div id="codeArea" style="float: top; width: 400px; height: 600px; border: black solid 1px; background-color: white; overflow-y: scroll;" onmousedown="$('#input')[0].focus(); return false;">
 				<textarea id="orgCode" style="display: none;"></textarea>
-				<input id="input" class="noFocus" onkeypress="return processKey(event);" onkeydown="return processKey2(event);" style="position: absolute; color: rgba(255, 255, 255, 0); border: 0; z-index: -1;" />
+				<input id="input" class="noFocus" onkeypress="return ohiKeypress(event);" onkeydown="return ohiKeydown(event);" style="position: absolute; color: rgba(255, 255, 255, 0); border: 0; z-index: -1; width: 100px;" />
 				<textarea class="brush:bn;" id="code" style="float: top; width:400px; height: 600px;"></textarea>
 				<div id="cursur" style="position: absolute; background-color: black; width: 2px; height: 16px; z-index: 90; left: 808px; top: 62px;">&nbsp;</div>
 			</div>

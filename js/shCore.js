@@ -52,7 +52,7 @@ var sh = {
 		'title' : null,
 		
 		/** Enables or disables smart tabs. */
-		'smart-tabs' : true,
+		'smart-tabs' : false,
 		
 		/** Gets or sets tab size. */
 		'tab-size' : 4,
@@ -85,7 +85,7 @@ var sh = {
 		useScriptTags : true,
 		
 		/** Blogger mode flag. */
-		bloggerMode : false,
+		bloggerMode : true,
 		
 		stripBrs : true,
 		
@@ -302,7 +302,7 @@ var sh = {
 	highlight: function(globalParams, element)
 	{
 		var elements = this.findElements(globalParams, element),
-			propertyName = 'value', 
+			propertyName = 'innerHTML', 
 			highlighter = null,
 			conf = sh.config
 			;
@@ -1144,7 +1144,7 @@ function quickCodeHandler(e)
 		;
 	
 	for (var i = 0; i < lines.length; i++)
-		code.push(lines[i].value || lines[i].textContent);
+		code.push(lines[i].innerText || lines[i].textContent);
 	
 	// using \r instead of \r or \r\n makes this work equally well on IE, FF and Webkit
 	code = code.join('\r');

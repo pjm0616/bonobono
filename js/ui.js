@@ -32,14 +32,21 @@ $(function() {
 		reHilight();
 	});
 	$('#runButton').button().click(function() {
-		g_interp.eval(parse($('#orgCode')[0].value));
+		g_interp.eval(parse($('#orgCode')[0].innerHTML));
 	});
 	$("#exampleComboBox").combobox({
 		selected: function(event, ui) {
-								$('#orgCode').load('example/' + $('#exampleComboBox')[0].value);
-								curStart = curEnd = 0;
-								reHilight();
-							}
+			$.ajax({
+			  url: 'example/' + $('#exampleComboBox')[0].value,
+			  context: document.body,
+			  success: function(data){
+				    $('#orgCode')[0].innerHTML = data;
+						curStart = curEnd = 0;
+						console.log($('#orgCode')[0].value);
+						reHilight();
+				  }
+			});
+		}
 	});
 	var keyword = [
 		"loop", "rand", "concat", "speak", "face_left", "face_right",
@@ -55,24 +62,19 @@ $(function() {
 			$(this).next().css('top', $('#input')[0].style['top']);
 		},
 		source: function(req, responseFn) {
-			var pos = req.term.lastIndexOf(' ');
-			if (req.term.lastIndexOf('\n') > pos)
-				pos = req.term.lastIndexOf('\n');
-			text = req.term.substr(pos + 1);
-			var re = $.ui.autocomplete.escapeRegex(text);
+			var re = $.ui.autocomplete.escapeRegex(req.term);
 			var matcher = new RegExp("^" + re);
 			var a = $.grep(keyword, function(item,index){
 				return matcher.test(item);
 			});
-			console.log(a);
 			responseFn(a);
 		},
 		select: function(event, ui) {
 			var input = $('#input')[0];
 			var code = $('#orgCode')[0];
-			console.log(curStart);
-			console.log(input.selectionStart);
-			code.value = code.value.substr(0, curStart - input.selectionStart) + ui.item.value + code.value.substr(curStart - input.selectionStart + input.value.length);
+			var codeSeg = $('#orgCode')[0].innerHTML.substr(curStart);
+			pos = Math.min(codeSeg.indexOf(' ')==-1?9999:codeSeg.indexOf(' '), codeSeg.indexOf('\n')==-1?9999:codeSeg.indexOf('\n'), codeSeg.indexOf('(')==-1?9999:codeSeg.indexOf('('), codeSeg.indexOf(')')==-1?9999:codeSeg.indexOf(')'));
+			code.innerHTML = code.innerHTML.substr(0, curStart - input.selectionStart) + ui.item.value + code.innerHTML.substr(curStart + pos);
 			curStart = curStart + ui.item.value.length - input.selectionStart;
 			curEnd = curStart;
 			input.value = "";
@@ -85,28 +87,58 @@ $(function() {
 	});
 });
 function showSelectionDialog(content, callback, data) {
-	$('#userInputDialog').dialog({
-		autoOpen: true,
-		show: "blind",
-		hide: "blind",
-		resizable: false,
-		draggable: false,
-		width: 400,
-		open: (function() {
-			$('#userInputDialog')[0].innerHTML = '<p>' + content + '</p>';
-			console.log(data);
-			for (var i in data) {
-				var button = document.createElement('button');
-				button.innerText = data[i];
-				button.id = "button" + data[i];
-				$('#userInputDialog')[0].appendChild(button);
-				$('#button' + data[i]).button().click(function() {
-							callback(data[i]);
-							$('#userInputDialog').dialog('close');
-							$('#userInputDialog').dialog('destroy');
-						});
-				$('#button' + data[i]).css('width', 375);
-			}
-		})
-	});
+	if (data == "none") {
+		$('#userInputDialog').dialog({
+			autoOpen: true,
+			show: "blind",
+			hide: "blind",
+			resizable: false,
+			draggable: false,
+			width: 400,
+			open: function() {
+				$('#userInputDialog')[0].innerHTML = '<p>' + content + '</p>' +
+																						 '<input type="text" id="userInput" class="text ui-widget-content ui-corner-all" size=50 />';
+				},
+			buttons: {
+				"확인": function() {
+						var ret = $('#userInput')[0].value;
+						$('#userInputDialog').dialog('close');
+						$('#userInputDialog').dialog('destroy');
+						while (typeof $('#userInputDialog')[0].children[0] != "undefined") {
+							$('#userInputDialog')[0].removeChild($('#userInputDialog')[0].children[0]);
+						}
+						callback(ret);
+				}}
+		});
+	}
+	else {
+		$('#userInputDialog').dialog({
+			autoOpen: true,
+			show: "blind",
+			hide: "blind",
+			resizable: false,
+			draggable: false,
+			width: 400,
+			open: (function() {
+				$('#userInputDialog')[0].innerHTML = '<p>' + content + '</p>';
+				for (var i in data) {
+					var button = document.createElement('button');
+					var str = new String(data[i]);
+					button.innerText = data[i];
+					button.id = "button" + i;
+					$('#userInputDialog')[0].appendChild(button);
+					$('#button' + i).button().click(function() {
+								var ret = $(this)[0].innerText; 
+								$('#userInputDialog').dialog('close');
+								$('#userInputDialog').dialog('destroy');
+								while (typeof $('#userInputDialog')[0].children[0] != "undefined") {
+									$('#userInputDialog')[0].removeChild($('#userInputDialog')[0].children[0]);
+								}
+								callback(ret);
+							});
+					$('#button' + i).css('width', 375);
+				}
+			})
+		});
+	}
 }
