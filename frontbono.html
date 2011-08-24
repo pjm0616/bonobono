@@ -52,8 +52,6 @@
 		<script type="text/javascript">
 			init_data();
 			
-			// shake 주기 1??		// 15�씩 �다갔다
-			
 			face_shake_speed = 0;
 			face_shake_A = 15;
 			body_shake_speed = 0;
@@ -61,13 +59,15 @@
 			body_arm_speed = 0.5;
 			body_arm_A = 30;
 			
-			face_sweat_len = 0;
+			face_sweat_len = 3;
 			
-			face_eye_state = 0;
+			face_eye_state = 2;
 			
 			face_red = 0;
 			
 			face_mouse_speed = 0;
+			
+			body_walk_dir = 1;
 			
 			setInterval(draw_front,time_interval);
 			

@@ -56,17 +56,21 @@ def conv(t):
 			else : point.append(float(head))
 	return result, res, point
 
-data = """217.4728 355.4556 m
-246.4692 347.4566 248.4689 327.4591 V
-249.4688 308.4614 222.4722 312.4609 V
-204.4744 314.4607 216.4729 334.4582 V
-233.4708 352.4559 217.4728 355.4556 v
+data = """275.9655 502.9371 m
+290.9636 469.9412 296.9629 505.9367 v
 """;
 
 a, b, c = conv(data)
-print a
+#print a
+print "\n\npoint = " , c , ";\n"
+print "ctx.beginPath();\n"
 print b
-print c
+print "ctx.fill();\nctx.stroke();\n";
+
+
+
+
+
 
 
 
