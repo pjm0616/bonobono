@@ -1,0 +1,41 @@
+(define cons
+  (lambda (a b)
+    (lambda (n)
+      (if n a b))))
+
+(define car
+  (lambda (p)
+    (p true)))
+
+(define cdr
+  (lambda (p)
+    (p false)))
+
+(define length
+  (lambda (l)
+    (if (null l)
+    	0
+	(add 1 (length (cdr l))))))
+
+(define merge
+  (lambda (a b)
+    (if (null a) b
+    (if (null b) a
+    (if (lt (car a) (car b))
+        (cons (car a) (merge (cdr a) b))
+    	(cons (car b) (merge a (cdr b))))))))
+
+(define split
+  (lambda (n a b)
+    (if (eq n 0)
+    	(cons a b)
+	(split (sub n 1) (cdr a) (cons (car a) b)))))
+
+(define sort
+  (lambda (l)
+    (let (len (length l))
+      (if (le len 1)
+      	  l
+	  (let (splited (split (div len 2) l nil))
+	    (merge (sort (car splited))
+	    	   (sort (cdr splited))))))))
