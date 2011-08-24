@@ -9,11 +9,12 @@
 			(begin 
 				(setv "face_mouse_speed" 5)
 				(speak (list-get rps_list bono) 170 200)
-				(sleep 1000)
+				(sleep 500)
 				(if (eq user (list-get rps_list bono))
 					(begin
 						(setv "body_arm_A" 30)
 						(setv "body_arm_speed" 2)
+						(face_shake 0.5 2)
 						(speak "때릴꼬얌?" 110 200)
 					)
 					(setv "face_red" 0))

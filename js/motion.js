@@ -63,8 +63,13 @@ var motion = {
 	face_shake: function(speed,sec)
 	{
 		set_log("face shake : speed = " + speed + " | sec = " + sec);
-		face_shake_speed = 0.5;
+		face_shake_speed = speed;
 		face_shake_A = 15;
+
+		$(document).oneTime(1000 * sec, function(){
+			face_shake_speed = 0;
+		});
+
 	},
 
 	body_left: function()
