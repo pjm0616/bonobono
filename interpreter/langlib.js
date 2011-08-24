@@ -36,6 +36,19 @@ function loadlibs(interp) {
 					'(begin (func) (loop))))'+
 					'(loop)))'
 		);
+		add_func('forloop-step',
+			'(lambda (start end step func)'+
+				'(letrec (loop (lambda (n)'+
+					'(begin'+
+						'(func n)'+
+						'(if (eq n end)'+
+							'0'+
+							'(loop (add n step))) )))'+
+					'(loop start)))'
+		);
+		add_func('forloop',
+			'(lambda (start end func) (forloop-step start end 1 func))'
+		);
 	};
 
 	var load_math = function() {
@@ -57,19 +70,7 @@ function loadlibs(interp) {
 		add_native_func('list-len', function(interp, args) {
 			return args[0].length;
 		});
-		add_func('forloop-step',
-			'(lambda (start end step func)'+
-				'(letrec (loop (lambda (n)'+
-					'(begin'+
-						'(func n)'+
-						'(if (eq n end)'+
-							'0'+
-							'(loop (add n step))) )))'+
-					'(loop start)))'
-		);
-		add_func('forloop',
-			'(lambda (start end func) (forloop-step start end 1 func))'
-		);
+
 		add_func('list-foreach',
 			'(lambda (lst func)'+
 				'(forloop 0 (sub (list-len lst) 1)'+
