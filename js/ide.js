@@ -4,6 +4,34 @@ var ohiQ = Array(0,0,0,0,0,0);
 var ohiTimeout = 0;
 var ohiStatus = document.createElement('a');
 
+function lineClicked(e, lineNum, st) {
+	var pos = 0;
+	var code = $('#orgCode')[0].innerHTML;
+	for (var i = Number(lineNum) - 1; i > 0; i--) {
+		pos += code.indexOf('\n') + 1;
+		code = code.substr(code.indexOf('\n') + 1);
+	}
+	tmpCode = code.substr(0, code.indexOf('\n')).replace(/[ㄱ-ㅎㅏ-ㅢ가-힣]/g, '\t\a');
+	rest = Math.floor((e.offsetX / 8) + 0.5) + Math.floor(e.offsetY / 16) * 46;
+	len = 0;
+	while(rest > len) {
+		if (tmpCode[len + 45] == '\t' && tmpCode[len + 46] == '\a') {
+			tmpCode = tmpCode.substr(0,45) + '\v' + tmpCode.substr(45);
+			console.log('wrap');
+		}
+		len += 46;
+	}
+	console.log(tmpCode.replace(/\t/g, 'a'));
+	pos += tmpCode.substr(0, rest).replace(/\t\a/g, 'a').replace(/\v/g, '').length;
+	if (st == "down")
+		curStart = pos;
+	else if (st == "up")
+		curEnd = pos;
+
+	console.log(st + ' ' + pos);
+	moveInput();
+}
+
 function highlight() {
 	SyntaxHighlighter.highlight();
 }
@@ -22,7 +50,7 @@ function reHilight() {
 }
 function moveInput() {
 	var input = $('#input')[0];
-	var code = $('#orgCode')[0].innerHTML.substr(0, curStart).replace(/[ㄱ-ㅎ가-힣]/gi, 'aa');
+	var code = $('#orgCode')[0].innerHTML.substr(0, curStart).replace(/[ㄱ-ㅎㅏ-ㅢ가-힣]/gi, '\t\t');
 	pos = Math.max(code.lastIndexOf(' '), code.lastIndexOf('\n'), code.lastIndexOf('('), code.lastIndexOf(')')) + 1;
 	input.value = code.substr(pos);
 	var coord = curPosition2coord();
@@ -31,12 +59,13 @@ function moveInput() {
 	$('#cursur').css('left', coord[0] + 8);
 	$('#cursur').css('top', coord[1] - 3);
 	findPairPh();
+	console.log('cursur : ' + curStart);
 }
 function curPosition2coord(pos) {
 	if (typeof pos == "undefined") {
 		pos = curStart;
 	}
-	var code = $('#orgCode')[0].innerHTML.substr(0, pos).replace(/[ㄱ-ㅎㅏ-ㅢ가-힣]/g, '\t\t');
+	var code = $('#orgCode')[0].innerHTML.substr(0, pos).replace(/[ㄱ-ㅎㅏ-ㅢ가-힣]/g, '\t\a');
 	var line = 0;
 	var col = 0;
 	rest = 0;
@@ -46,14 +75,19 @@ function curPosition2coord(pos) {
 		if (tmp <= 46 && tmp >= 0) 
 			code = code.substr(tmp + 1);
 		else {
-			if (code[45] == '\t' && code[46] == '\t')
+			if (code[45] == '\t' && code[46] == '\a') {
 				code = code.substr(45);
-			else
+				console.log('wrap');
+			}
+			else {
 				code = code.substr(46);
+				console.log('nowrap');
+			}
 		}
+		console.log(code.replace(/\t\a/g, 'aa'));
 		line += 1;
 	}
-	return [(col) * 8 + 800, (line) * 16 + 46];
+	return [(col) * 8 + 800, (line) * 16 + 46 - $('#codeArea')[0].scrollTop];
 }
 
 function findPairPh() {
@@ -87,8 +121,8 @@ function findPairPh() {
 	$('#rightPh').css('top', rightPos[1] - 3);
 	$('#leftPh').css('visibility', 'visible');
 	$('#rightPh').css('visibility', 'visible');
-	
-	console.log(leftCode.length + ' ' + ($('#orgCode')[0].innerHTML.length -  rightCode.length));
+
+	console.log('ph : ' + leftCode.length + ' ' + ($('#orgCode')[0].innerHTML.length -  rightCode.length));
 }
 
 function ohiDoubleJamo(a,c,d) {
@@ -220,6 +254,29 @@ function ohiKeypress(e) {
 		moveInput();
 		reHilight();
 	}
+	else if (c == 22 && e.ctrlKey) {
+		var f = $('#orgCode')[0];
+		var endText = f.innerHTML.substr(curEnd,f.value.length);
+		f.innerHTML = f.innerHTML.substr(0, curStart) + clip.clipText;
+		f.innerHTML += endText;
+		curStart += clip.clipText.length;
+		curEnd = curStart;
+		moveInput();
+		reHilight();
+	}
+	else if (c == 3 && e.ctrlKey) {
+		clip.setText($('#orgCode')[0].innerHTML.substr(curStart, curEnd - curStart));
+	}
+	else if (c == 24 && e.ctrlKey) {
+		var f = $('#orgCode')[0];
+		var endText = f.innerHTML.substr(curEnd,f.value.length);
+		clip.setText(f.innerHTML.substr(curStart, curEnd - curStart));
+		f.innerHTML = f.innerHTML.substr(0, curStart);
+		f.innerHTML += endText;
+		curEnd = curStart;
+		moveInput();
+		reHilight();
+	}
 	else if (ohiStatus.innerHTML.substr(0,2) == 'En' || c == 32)
 	{
 		if (ohiQ[0]||ohiQ[1]||ohiQ[2]||ohiQ[3]||ohiQ[4]||ohiQ[5]) {
@@ -228,7 +285,8 @@ function ohiKeypress(e) {
 		}
 		ohiQ = Array(0,0,0,0,0,0);
 		ohiInsert("En", c);
-	}	
+	}
+	console.log(c + ' asdf');
 	if (e.preventDefault) e.preventDefault();
 	return false;
 }
@@ -261,7 +319,7 @@ function ohiKeydown(e) {
 		curStart -= curStart > 0?1:0;
 		if (!e.shiftKey)
 			curEnd = curStart
-		moveInput();
+				moveInput();
 		return false;
 	}
 	else if (e.keyCode == 39)
@@ -270,6 +328,17 @@ function ohiKeydown(e) {
 		if (!e.shiftKey)
 			curStart = curEnd;
 		moveInput();
+		return false;
+	}
+	else if (e.keyCode == 38)
+	{
+		var str = $('#orgCode')[0].innerHTML.substr(0, curStart);
+		if (!e.shiftKey)
+			curEnd = curStart;
+		return false;
+	}
+	else if (e.keyCode == 40)
+	{
 		return false;
 	}
 	console.log(e.keyCode);

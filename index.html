@@ -12,6 +12,8 @@
 		<link rel="stylesheet" type="text/css" href="css/shCoreDefault.css" />
 		<link rel="stylesheet" type="text/css" href="css/shThemeDefault.css" />
 
+		<script type="text/javascript" src="js/ZeroClipboard.js"></script>
+
 		<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
 		<script type="text/javascript" src="js/jquery-timer-1.0.0.js"></script>
@@ -28,6 +30,7 @@
 		<script type="text/javascript" src="interpreter/lexer.js"></script>
 		<script type="text/javascript" src="interpreter/listparser.js"></script>
 		<script type="text/javascript" src="interpreter/parser.js"></script>
+		<script type="text/javascript" src="interpreter/langlib.js"></script>
 		<script type="text/javascript" src="interpreter/eval.js"></script>
 		<script type="text/javascript" src="interpreter/util.js"></script>
 
@@ -35,22 +38,60 @@
 		<script type="text/javascript" src="js/motion.js"></script>
 
 		<script type="text/javascript">
-			var g_interp = new Interp();
-			register_funcs(g_interp, motion);
+			var g_interp;
+			var g_state;
+			var global = this;
+			var funcs;
+			var g_suspended;
+			var return_event;
+			function resetInterp() {
+				 g_interp = new Interp();
+				 g_state;
+				register_funcs(g_interp, motion);
 
-			var funcs = {
-				'alert': alert,
-				'prompt': function(msg) {
-					return prompt(msg);
-				},
+				 global = this;
+				 funcs = {
+					'alert': alert,
+					'prompt': function(msg) {
+						return prompt(msg);
+					},
+				'setv': function(name, value) {
+					var code = name + ' = ' + JSON.stringify(value) + ';';
+					eval(code);
+				}
 			};
 			register_funcs(g_interp, funcs);
-			
-			init_data();
 
+			 g_suspended = {};
+			g_interp.global_env['wait_event'] = native_func(function(interp, args, state) {
+					g_suspended[args[0]] = state;
+					});
+
+
+			g_interp.global_env['choice'] = native_func(function(interp, args, state) {
+					var callback = (function(state) {
+						return function(selected) { /*alert(selected);*/state.do_return(selected);} 
+						})(state);
+					showSelectionDialog(args[0],callback,args.slice(1));
+					});
+
+			 return_event = function(name, retv) {
+				var s = g_suspended[name];
+				g_suspended[name] = null;
+				s.do_return(retv);
+			}
+			g_interp.global_env['test'] = g_interp.eval(parse('(lambda () (alert "test"))'))
+
+			init_data();
 			setInterval(draw_front, time_interval);
+			};
+			resetInterp();
 		</script>
 
+		<script>
+			ZeroClipboard.setMoviePath( 'js/ZeroClipboard.swf' );
+			var clip = new ZeroClipboard.Client();
+		</script>
 	</head>
 	<body>
 		<div id="screenDiv" style="float: left">
@@ -64,9 +105,10 @@
 					<option value="">Select</option>
 					<option value="sort.bn">Sort</option>
 					<option value="test1.bn">Test1</option>
+					<option value="lps.bn">lps</option>
 				</select>
 			</div>
-			<div id="codeArea" style="float: top; width: 400px; height: 600px; border: black solid 1px; background-color: white; overflow-y: scroll;" onmousedown="$('#input')[0].focus(); return false;">
+			<div id="codeArea" style="float: top; width: 400px; height: 600px; border: black solid 1px; background-color: white; overflow-y: scroll;" onmousedown="$('#input')[0].focus(); return false;" onscroll="moveInput(); $('#input').autocomplete('close');">
 				<textarea id="orgCode" style="display: none;"></textarea>
 				<input id="input" class="noFocus" onkeypress="return ohiKeypress(event);" onkeydown="return ohiKeydown(event);" style="position: absolute; color: rgba(255, 255, 255, 0); border: 0; z-index: -1; width: 100px;" />
 				<textarea class="brush:bn;" id="code" style="float: top; width:400px; height: 600px;"></textarea>
@@ -75,7 +117,7 @@
 				<div id="rightPh" style="position: absolute; background-color: rgba(0, 0, 0, 0.3); width: 8px; height: 16px; z-index: 90; visibility: hidden">&nbsp;</div>
 			</div>
 			<div>
-				<textarea id="logbono" style="float:bottom;"></textarea>
+				<textarea id="logbono" style="float:bottom; visibility: hidden; display: none;"></textarea>
 			</div>
 			<div class="action" style="float: top; font-size:10pt;">
 				<span>

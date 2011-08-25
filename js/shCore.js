@@ -718,7 +718,7 @@ function eachLine(str, callback)
  */
 function trimFirstAndLastLines(str)
 {
-	return str.replace(/^[ ]*[\n]+|[\n]*[ ]*$/g, '');
+	return str;
 };
 
 /**
@@ -1410,7 +1410,7 @@ sh.Highlighter.prototype = {
 		if (lineNumber == 0)
 			classes.push('break');
 			
-		return '<div class="' + classes.join(' ') + '">' + code + '</div>';
+		return '<div class="' + classes.join(' ') + '" onmousedown="lineClicked(event, this.classList[1].substr(6), \'down\');" onmouseup="lineClicked(event, this.classList[1].substr(6), \'up\');">' + code + '</div>';
 	},
 	
 	/**

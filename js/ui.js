@@ -27,11 +27,13 @@ $(function() {
 		}
 	});
 	$("#clearButton").button().click(function() {
-		code.value = "";
+		$('#orgCode')[0].innerHTML = "";
 		curStart = 0;
 		reHilight();
+		moveInput();
 	});
 	$('#runButton').button().click(function() {
+		resetInterp();
 		g_interp.eval(parse($('#orgCode')[0].innerHTML));
 	});
 	$("#exampleComboBox").combobox({
@@ -40,7 +42,7 @@ $(function() {
 			  url: 'example/' + $('#exampleComboBox')[0].value,
 			  context: document.body,
 			  success: function(data){
-				    $('#orgCode')[0].innerHTML = data.replace(/\t/g, '\ \ \ \ ');
+				    $('#orgCode')[0].innerHTML = data.replace(/\t/g, '\ \ \ \ ').replace(/\r\n/, '\n').replace(/\r/, '\n');
 						curStart = curEnd = 0;
 						console.log($('#orgCode')[0].value);
 						reHilight();

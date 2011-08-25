@@ -1,4 +1,3 @@
-
 (begin
 	(setglobal "next-body-walk-dir" 1)
 	(start (infloop (lambda () (begin
